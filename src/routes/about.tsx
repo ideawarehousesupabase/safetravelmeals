@@ -10,7 +10,7 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About & Contact — SafeMeal" },
-      { name: "description", content: "Our mission, vision, and how to reach the SafeMeal team." },
+      { name: "description", content: "Safe Travel Meal Kits Limited: who we are, what stage we are at, and how to reach us." },
     ],
   }),
   component: AboutPage,
@@ -52,13 +52,13 @@ function AboutPage() {
 
   return (
     <SiteShell>
-      <PageHeader eyebrow="About SafeMeal" title="A safer plate, anywhere in the world." description="We exist so the 1.5 billion travelers with dietary needs never travel hungry — or unsafe — again." />
+      <PageHeader eyebrow="About Safe Travel Meal Kits" title="Continuity of assurance across a journey." description="Each counter a traveller meets discharges its own allergen duty. Nobody holds assurance across the whole trip. We built a protocol to do that, for the 2.4 million UK adults with a clinically confirmed food allergy." />
 
       <section className="mx-auto max-w-7xl px-6 py-14 grid lg:grid-cols-3 gap-6">
         {[
-          { icon: Heart, title: "Our Mission", desc: "Make every airport, hotel and station a safe place to eat — for every body." },
-          { icon: ShieldCheck, title: "Food Safety First", desc: "Medical-grade screening, audited kitchens, and tamper-evident QR passports on every kit." },
-          { icon: Globe, title: "Global Vision", desc: "Build the world's most trusted food-safety logistics layer for travel — from LHR to NRT." },
+          { icon: Heart, title: "Where it started", desc: "Our founder is a professional chef in London hotel kitchens with Level 3 food hygiene certification who works to HACCP every day. He saw, from behind the pass, that a shared breakfast line can reduce allergen risk but cannot verify its absence." },
+          { icon: ShieldCheck, title: "What we sell", desc: "A stated production regime and a verifiable record of it: single-allergen runs, signed line clearance, numbered seals and a hash-chained handover record. Our CTO, a full-stack engineer, builds the platform that executes it." },
+          { icon: Globe, title: "Where we are", desc: "Technology readiness level 4 with a working prototype. UK patent application GB2617886.3 filed. Greater London first; the service is United Kingdom only." },
         ].map((c) => (
           <div key={c.title} className="rounded-3xl border border-brand-border bg-card p-7">
             <div className="size-12 rounded-2xl bg-brand-accent/10 text-brand-accent grid place-items-center mb-5">
@@ -74,7 +74,7 @@ function AboutPage() {
         <div className="rounded-3xl border border-brand-border bg-card p-8">
           <p className="text-xs font-bold text-brand-accent uppercase tracking-[0.2em]">Get in touch</p>
           <h2 className="font-display text-3xl font-extrabold mt-2">We'd love to hear from you</h2>
-          <p className="text-muted-foreground mt-3 text-sm">Questions, feedback or accessibility requests — our safety team replies within 4 hours.</p>
+          <p className="text-muted-foreground mt-3 text-sm">Questions, feedback or accessibility requests. Your message goes straight to the founding team.</p>
 
           <form onSubmit={onSubmit} className="mt-6 space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -93,16 +93,16 @@ function AboutPage() {
           <div className="rounded-3xl bg-gradient-to-br from-brand-primary via-slate-800 to-brand-primary text-white p-8">
             <Building2 className="size-5 text-brand-accent mb-3" />
             <h3 className="font-display font-extrabold text-xl">Partnership Inquiries</h3>
-            <p className="text-white/70 text-sm mt-2 leading-relaxed">Airline, airport, hotel chain or kitchen operator? Join the SafeMeal network.</p>
-            <a href="mailto:partners@safemeal.com" className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-accent text-white px-5 py-2.5 text-sm font-bold">
-              <Mail className="size-4" /> partners@safemeal.com
-            </a>
+            <p className="text-white/70 text-sm mt-2 leading-relaxed">Hotel, venue, employer or kitchen operator? Each partnership follows the same path: engagement, a food safety assessment, a controlled pilot, then a commercial review.</p>
+            <p className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand-accent text-white px-5 py-2.5 text-sm font-bold">
+              <Mail className="size-4" /> Use the form, subject "Partnership"
+            </p>
           </div>
 
           <div className="rounded-3xl border border-brand-border bg-card p-8 space-y-4 text-sm">
-            <Detail icon={Mail} label="Email" value="hello@safemeal.com" />
-            <Detail icon={MapPin} label="HQ" value="125 Spring St, New York, NY 10012" />
-            <Detail icon={Globe} label="Operating in" value="32 countries · 450+ airports · 1,800+ hotels" />
+            <Detail icon={Building2} label="Company" value="Safe Travel Meal Kits Limited" />
+            <Detail icon={MapPin} label="Based in" value="London, United Kingdom" />
+            <Detail icon={Globe} label="Service area" value="Greater London during validation; United Kingdom only" />
           </div>
         </div>
       </section>

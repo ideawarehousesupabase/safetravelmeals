@@ -4,8 +4,9 @@ import type { ReactNode } from "react";
 
 const navLinks = [
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/protocol", label: "Protocol" },
   { to: "/itinerary", label: "Itinerary" },
-  { to: "/scheduling", label: "AI Scheduler" },
+  { to: "/scheduling", label: "Meal Plan" },
   { to: "/meals", label: "Meals" },
   { to: "/tracking", label: "Tracking" },
   { to: "/about", label: "About" },
@@ -60,17 +61,15 @@ export function SiteFooter() {
             <ShieldCheck className="size-3.5 text-white" />
           </div>
           <span className="font-display font-extrabold text-foreground">SAFEMEAL</span>
-          <span className="ml-3">© 2026 SafeMeal Technologies Inc.</span>
+          <span className="ml-3">© 2026 Safe Travel Meal Kits Limited · prototype (TRL 4)</span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <Link to="/about" className="hover:text-brand-accent">About</Link>
           <Link to="/admin" className="hover:text-brand-accent">Admin</Link>
           <Link to="/kitchen" className="hover:text-brand-accent">Kitchens</Link>
           <Link to="/hotel" className="hover:text-brand-accent">Hotels</Link>
-          <span className="flex items-center gap-2">
-            <span className="size-1.5 rounded-full bg-brand-success animate-pulse" />
-            Operational
-          </span>
+          <Link to="/protocol" className="hover:text-brand-accent">Protocol</Link>
+          <Link to="/validation" className="hover:text-brand-accent">Validation</Link>
         </div>
       </div>
     </footer>

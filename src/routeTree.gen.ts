@@ -9,19 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ValidationRouteImport } from './routes/validation'
 import { Route as TrackingRouteImport } from './routes/tracking'
 import { Route as SchedulingRouteImport } from './routes/scheduling'
+import { Route as RulesRouteImport } from './routes/rules'
+import { Route as ProtocolRouteImport } from './routes/protocol'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MealsRouteImport } from './routes/meals'
 import { Route as KitchenRouteImport } from './routes/kitchen'
 import { Route as ItineraryRouteImport } from './routes/itinerary'
 import { Route as HotelRouteImport } from './routes/hotel'
+import { Route as ExceptionsRouteImport } from './routes/exceptions'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecordsIndexRouteImport } from './routes/records.index'
+import { Route as RecordsKitIdRouteImport } from './routes/records.$kitId'
 
+const ValidationRoute = ValidationRouteImport.update({
+  id: '/validation',
+  path: '/validation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackingRoute = TrackingRouteImport.update({
   id: '/tracking',
   path: '/tracking',
@@ -30,6 +41,16 @@ const TrackingRoute = TrackingRouteImport.update({
 const SchedulingRoute = SchedulingRouteImport.update({
   id: '/scheduling',
   path: '/scheduling',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RulesRoute = RulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtocolRoute = ProtocolRouteImport.update({
+  id: '/protocol',
+  path: '/protocol',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -57,6 +78,11 @@ const HotelRoute = HotelRouteImport.update({
   path: '/hotel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExceptionsRoute = ExceptionsRouteImport.update({
+  id: '/exceptions',
+  path: '/exceptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -82,6 +108,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecordsIndexRoute = RecordsIndexRouteImport.update({
+  id: '/records/',
+  path: '/records/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecordsKitIdRoute = RecordsKitIdRouteImport.update({
+  id: '/records/$kitId',
+  path: '/records/$kitId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,13 +125,19 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
   '/onboarding': typeof OnboardingRoute
+  '/protocol': typeof ProtocolRoute
+  '/rules': typeof RulesRoute
   '/scheduling': typeof SchedulingRoute
   '/tracking': typeof TrackingRoute
+  '/validation': typeof ValidationRoute
+  '/records/$kitId': typeof RecordsKitIdRoute
+  '/records/': typeof RecordsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -103,13 +145,19 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
   '/onboarding': typeof OnboardingRoute
+  '/protocol': typeof ProtocolRoute
+  '/rules': typeof RulesRoute
   '/scheduling': typeof SchedulingRoute
   '/tracking': typeof TrackingRoute
+  '/validation': typeof ValidationRoute
+  '/records/$kitId': typeof RecordsKitIdRoute
+  '/records': typeof RecordsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -118,13 +166,19 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/dashboard': typeof DashboardRoute
+  '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
   '/onboarding': typeof OnboardingRoute
+  '/protocol': typeof ProtocolRoute
+  '/rules': typeof RulesRoute
   '/scheduling': typeof SchedulingRoute
   '/tracking': typeof TrackingRoute
+  '/validation': typeof ValidationRoute
+  '/records/$kitId': typeof RecordsKitIdRoute
+  '/records/': typeof RecordsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -134,13 +188,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/dashboard'
+    | '/exceptions'
     | '/hotel'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
     | '/onboarding'
+    | '/protocol'
+    | '/rules'
     | '/scheduling'
     | '/tracking'
+    | '/validation'
+    | '/records/$kitId'
+    | '/records/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -148,13 +208,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/dashboard'
+    | '/exceptions'
     | '/hotel'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
     | '/onboarding'
+    | '/protocol'
+    | '/rules'
     | '/scheduling'
     | '/tracking'
+    | '/validation'
+    | '/records/$kitId'
+    | '/records'
   id:
     | '__root__'
     | '/'
@@ -162,13 +228,19 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/dashboard'
+    | '/exceptions'
     | '/hotel'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
     | '/onboarding'
+    | '/protocol'
+    | '/rules'
     | '/scheduling'
     | '/tracking'
+    | '/validation'
+    | '/records/$kitId'
+    | '/records/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -177,17 +249,30 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   DashboardRoute: typeof DashboardRoute
+  ExceptionsRoute: typeof ExceptionsRoute
   HotelRoute: typeof HotelRoute
   ItineraryRoute: typeof ItineraryRoute
   KitchenRoute: typeof KitchenRoute
   MealsRoute: typeof MealsRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProtocolRoute: typeof ProtocolRoute
+  RulesRoute: typeof RulesRoute
   SchedulingRoute: typeof SchedulingRoute
   TrackingRoute: typeof TrackingRoute
+  ValidationRoute: typeof ValidationRoute
+  RecordsKitIdRoute: typeof RecordsKitIdRoute
+  RecordsIndexRoute: typeof RecordsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/validation': {
+      id: '/validation'
+      path: '/validation'
+      fullPath: '/validation'
+      preLoaderRoute: typeof ValidationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tracking': {
       id: '/tracking'
       path: '/tracking'
@@ -200,6 +285,20 @@ declare module '@tanstack/react-router' {
       path: '/scheduling'
       fullPath: '/scheduling'
       preLoaderRoute: typeof SchedulingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rules': {
+      id: '/rules'
+      path: '/rules'
+      fullPath: '/rules'
+      preLoaderRoute: typeof RulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protocol': {
+      id: '/protocol'
+      path: '/protocol'
+      fullPath: '/protocol'
+      preLoaderRoute: typeof ProtocolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -237,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HotelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/exceptions': {
+      id: '/exceptions'
+      path: '/exceptions'
+      fullPath: '/exceptions'
+      preLoaderRoute: typeof ExceptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -272,6 +378,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/records/': {
+      id: '/records/'
+      path: '/records'
+      fullPath: '/records/'
+      preLoaderRoute: typeof RecordsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/records/$kitId': {
+      id: '/records/$kitId'
+      path: '/records/$kitId'
+      fullPath: '/records/$kitId'
+      preLoaderRoute: typeof RecordsKitIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -281,13 +401,19 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   DashboardRoute: DashboardRoute,
+  ExceptionsRoute: ExceptionsRoute,
   HotelRoute: HotelRoute,
   ItineraryRoute: ItineraryRoute,
   KitchenRoute: KitchenRoute,
   MealsRoute: MealsRoute,
   OnboardingRoute: OnboardingRoute,
+  ProtocolRoute: ProtocolRoute,
+  RulesRoute: RulesRoute,
   SchedulingRoute: SchedulingRoute,
   TrackingRoute: TrackingRoute,
+  ValidationRoute: ValidationRoute,
+  RecordsKitIdRoute: RecordsKitIdRoute,
+  RecordsIndexRoute: RecordsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

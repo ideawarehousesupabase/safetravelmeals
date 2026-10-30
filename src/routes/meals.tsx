@@ -1,49 +1,47 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { ShieldCheck, Filter, ArrowRight, Plus, Check, X, Flame, Droplet, Wheat } from "lucide-react";
+import { CapabilityNote, SetBadge } from "@/components/jaap/jaap-ui";
+import { Filter, ArrowRight } from "lucide-react";
 import mealSalmon from "@/assets/meal-salmon.jpg";
 import mealZen from "@/assets/meal-zen.jpg";
 import mealCabin from "@/assets/meal-cabin.jpg";
-import mealHydration from "@/assets/meal-hydration.jpg";
 import mealMezze from "@/assets/meal-mezze.jpg";
-import mealProtein from "@/assets/meal-protein.jpg";
+import { DISHES, EXCLUSION_SETS, PREFERENCES, WINDOW_TYPES, type Preference, type WindowType } from "@/lib/jaap/protocol";
 
 export const Route = createFileRoute("/meals")({
   head: () => ({
     meta: [
-      { title: "Meal Marketplace — SafeMeal" },
-      { name: "description", content: "Allergy-safe, vegan, gluten-free, halal & kosher meals — verified for travel." },
+      { title: "Travel Menu System — SafeMeal" },
+      { name: "description", content: "Breakfast-led, culturally tailored travel dishes produced in single-allergen runs." },
     ],
   }),
   component: MealsPage,
 });
 
-const FILTERS = ["All", "Gluten-Free", "Vegan", "Halal", "Kosher", "Dairy-Free", "Nut-Free"];
-
-const MEALS = [
-  { id: 1, name: "Transatlantic Salmon", brand: "Nordic Galley Co.", img: mealSalmon, desc: "Omega-3 rich for jet-lag recovery", price: "$24", tags: ["Gluten-Free", "Dairy-Free"], cal: 540, protein: 38 },
-  { id: 2, name: "Altitude Zen Bowl", brand: "Verdant Kitchens", img: mealZen, desc: "Vegan, designed for digestive ease", price: "$19", tags: ["Vegan", "Nut-Free"], cal: 460, protein: 22 },
-  { id: 3, name: "Overnight Cabin Box", brand: "Halal Skyline", img: mealCabin, desc: "Slow-release energy for red-eyes", price: "$16", tags: ["Halal", "High-Protein"], cal: 510, protein: 30 },
-  { id: 4, name: "Hydration Plus Bowl", brand: "PureGrain Lab", img: mealHydration, desc: "Electrolyte-balanced grain salad", price: "$18", tags: ["Vegan", "Gluten-Free"], cal: 420, protein: 18 },
-  { id: 5, name: "Mediterranean Mezze", brand: "Levant & Co.", img: mealMezze, desc: "Light, fragrant and Kosher-certified", price: "$22", tags: ["Kosher", "Dairy-Free"], cal: 480, protein: 24 },
-  { id: 6, name: "Long-Haul Protein Box", brand: "Atlas Provisions", img: mealProtein, desc: "Designed for 8h+ flights", price: "$26", tags: ["High-Protein", "Halal"], cal: 620, protein: 44 },
-];
+const IMAGES: Record<Preference, string> = {
+  "South Asian": mealCabin,
+  "Middle Eastern": mealMezze,
+  "East Asian": mealZen,
+  British: mealSalmon,
+};
+const TYPES: WindowType[] = ["breakfast", "late_arrival", "lunch", "in_transit"];
 
 function MealsPage() {
-  const [filter, setFilter] = useState("All");
-  const [open, setOpen] = useState<number | null>(null);
-  const filtered = filter === "All" ? MEALS : MEALS.filter((m) => m.tags.includes(filter));
-  const detail = MEALS.find((m) => m.id === open);
+  const [filter, setFilter] = useState<WindowType | "all">("all");
 
   return (
     <SiteShell>
-      <PageHeader eyebrow="Meal Marketplace" title="Curated, verified, travel-ready." description="Every meal lab-screened against 14 allergens and audited monthly." />
+      <PageHeader
+        eyebrow="Travel menu system"
+        title="Food you still want on the fourth morning."
+        description="Breakfast-led because hotel breakfast is the highest-risk routine occasion of a trip, and culturally tailored because the same three Western free-from dishes every morning is not a menu. Every dish must survive a cold chain, a thermal transport box and a hotel refrigerator, and be edible without a kitchen."
+      />
 
-      <div className="mx-auto max-w-7xl px-6 py-10">
-        <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+      <div className="mx-auto max-w-7xl px-6 py-10 space-y-8">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
           <Filter className="size-4 text-muted-foreground shrink-0 mr-2" />
-          {FILTERS.map((f) => (
+          {(["all", ...TYPES] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -51,99 +49,51 @@ function MealsPage() {
                 filter === f ? "bg-brand-primary text-white" : "border border-brand-border bg-card hover:border-brand-accent"
               }`}
             >
-              {f}
+              {f === "all" ? "All kit types" : WINDOW_TYPES[f].kit}
             </button>
           ))}
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((m) => (
-            <article
-              key={m.id}
-              className="bg-card rounded-2xl border border-brand-border overflow-hidden group hover:shadow-elegant transition-all"
-            >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {PREFERENCES.map((p) => (
+            <article key={p} className="bg-card rounded-2xl border border-brand-border overflow-hidden">
               <div className="aspect-[4/3] overflow-hidden bg-secondary border-b border-brand-border">
-                <img src={m.img} alt={m.name} width={800} height={600} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                <img src={IMAGES[p]} alt={`${p} travel dish`} width={800} height={600} className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div className="p-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-accent mb-1.5">{m.brand}</p>
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {m.tags.map((t) => (
-                    <span key={t} className="text-[10px] font-bold bg-secondary text-foreground px-2 py-0.5 rounded uppercase">{t}</span>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-brand-accent mb-2">{p}</p>
+                <ul className="space-y-2.5">
+                  {TYPES.filter((t) => filter === "all" || t === filter).map((t) => (
+                    <li key={t}>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{WINDOW_TYPES[t].kit}</p>
+                      <p className="text-sm font-semibold">{DISHES[p][t]}</p>
+                    </li>
                   ))}
-                </div>
-                <h3 className="font-bold">{m.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{m.desc}</p>
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Flame className="size-3" /> {m.cal}cal</span>
-                    <span className="flex items-center gap-1"><Droplet className="size-3" /> {m.protein}g</span>
-                  </div>
-                  <span className="font-bold font-display">{m.price}</span>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <button onClick={() => setOpen(m.id)} className="flex-1 rounded-full border border-brand-border py-2 text-xs font-bold hover:bg-secondary">
-                    Details
-                  </button>
-                  <Link to="/checkout" className="flex-1 rounded-full bg-brand-primary text-white py-2 text-xs font-bold flex items-center justify-center gap-1 hover:bg-brand-accent">
-                    <Plus className="size-3.5" /> Add
-                  </Link>
-                </div>
+                </ul>
               </div>
             </article>
           ))}
         </div>
-      </div>
 
-      {detail && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm grid place-items-center p-4" onClick={() => setOpen(null)}>
-          <div className="bg-card rounded-3xl max-w-2xl w-full overflow-hidden shadow-elegant" onClick={(e) => e.stopPropagation()}>
-            <div className="relative aspect-[16/9] bg-secondary">
-              <img src={detail.img} alt={detail.name} className="w-full h-full object-cover" />
-              <button onClick={() => setOpen(null)} className="absolute top-4 right-4 size-9 rounded-full bg-white/90 grid place-items-center hover:bg-white">
-                <X className="size-4" />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-2xl font-extrabold">{detail.name}</h2>
-                <span className="font-display text-2xl font-extrabold">{detail.price}</span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">{detail.desc}</p>
-
-              <div className="mt-5 grid grid-cols-3 gap-3">
-                {[
-                  ["Calories", `${detail.cal}`],
-                  ["Protein", `${detail.protein}g`],
-                  ["Carbs", "48g"],
-                ].map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-secondary p-3 text-center">
-                    <p className="text-xs text-muted-foreground">{k}</p>
-                    <p className="font-display font-extrabold">{v}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Ingredients</p>
-                <p className="text-sm">Wild salmon, quinoa, asparagus, lemon, olive oil, sea salt, fresh dill.</p>
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-2">
-                {[["Lab Tested", ShieldCheck], ["Allergen Locked", Check], ["Gluten-Free", Wheat]].map(([t, I]: any) => (
-                  <span key={t} className="flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full">
-                    <I className="size-3" /> {t}
-                  </span>
-                ))}
-              </div>
-
-              <Link to="/checkout" className="mt-6 w-full rounded-full bg-brand-accent text-white py-3 font-bold flex items-center justify-center gap-2 shadow-glow">
-                Add to itinerary <ArrowRight className="size-4" />
-              </Link>
-            </div>
+        <div className="rounded-2xl border border-brand-border bg-card p-6">
+          <h2 className="font-display font-extrabold text-lg">Produced in your exclusion set's run</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            A dish is not chosen by filtering a menu. Your profile is assigned to one of six published exclusion sets, and your kits are produced in a single-allergen run for that set, after line clearance and verification swabs.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {EXCLUSION_SETS.map((s) => (
+              <SetBadge key={s.id} setId={s.id} long />
+            ))}
           </div>
+          <Link to="/itinerary" className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-brand-accent">
+            Map a journey to see your kit plan <ArrowRight className="size-4" />
+          </Link>
         </div>
-      )}
+
+        <CapabilityNote>
+          Dish names and photographs are illustrative examples for this prototype. The founder's tested menu system is not reproduced here. Every kit label carries the full ingredient list with allergens emphasised.
+        </CapabilityNote>
+      </div>
     </SiteShell>
   );
 }

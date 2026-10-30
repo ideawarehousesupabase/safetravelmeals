@@ -10,7 +10,7 @@ export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
       { title: "Sign up — SafeMeal" },
-      { name: "description", content: "Create your SafeMeal traveler account." },
+      { name: "description", content: "Create your SafeMeal traveller account." },
     ],
   }),
   component: OnboardingPage,
@@ -70,10 +70,10 @@ function OnboardingPage() {
             <span className="text-brand-accent">Safe by design.</span>
           </h2>
           <p className="mt-4 text-white/70 max-w-md">
-            Every profile is reviewed by certified allergists before your first delivery.
+            Your diagnosed allergens are held as special category data under explicit consent, and appear in the custody record only as a pseudonymous key.
           </p>
         </div>
-        <p className="relative text-xs text-white/50">ISO 22000 · HIPAA-aligned · GDPR</p>
+        <p className="relative text-xs text-white/50">UK GDPR · explicit consent for health data · Information Commissioner's Office registration planned for month 1</p>
       </aside>
 
       <section className="flex items-center justify-center p-6 sm:p-12">
@@ -99,7 +99,7 @@ function OnboardingPage() {
             <p className="text-sm text-muted-foreground mt-2">
               {mode === "signup"
                 ? "Three minutes to a safer travel meal."
-                : "Pick up your safe-travel cockpit."}
+                : "Pick up your journeys and kit records."}
             </p>
           </div>
 

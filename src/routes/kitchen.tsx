@@ -1,50 +1,48 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { ChefHat, Package, ShieldCheck, Truck, AlertTriangle, Clock, Check } from "lucide-react";
+import { JaapNav, Pill, SetBadge, SimulatedBanner } from "@/components/jaap/jaap-ui";
+import { ChefHat, Package, Truck, ShieldCheck, Check, AlertTriangle, Clock } from "lucide-react";
+import { DEMO, KITCHEN, clearanceById } from "@/lib/jaap/demo";
+import { setById } from "@/lib/jaap/protocol";
+import { fmtDay, fmtTime } from "@/lib/jaap/time";
 
 export const Route = createFileRoute("/kitchen")({
   head: () => ({
     meta: [
-      { title: "Partner Kitchen Dashboard — SafeMeal" },
-      { name: "description", content: "Operational console for partner kitchens." },
+      { title: "Partner Kitchen Run Sheet — SafeMeal" },
+      { name: "description", content: "A production day of single-allergen runs, from the simulated records." },
     ],
   }),
   component: KitchenDashboard,
 });
 
-function KitchenDashboard() {
-  const orders = [
-    { id: "SM-0142", meal: "Quinoa Salmon Bowl", allergy: ["Gluten", "Nuts"], severity: "Severe", stage: "prep", eta: "10:15" },
-    { id: "SM-0143", meal: "Vegan Buddha Bowl", allergy: ["Dairy"], severity: "Moderate", stage: "packaging", eta: "10:25" },
-    { id: "SM-0144", meal: "Halal Protein Box", allergy: ["Sesame"], severity: "Anaphylactic", stage: "verify", eta: "10:35" },
-    { id: "SM-0145", meal: "Mediterranean Mezze", allergy: ["Shellfish"], severity: "Mild", stage: "incoming", eta: "10:55" },
-  ];
-  const stats = [
-    { label: "Active Orders", val: "24", icon: Package },
-    { label: "In Prep", val: "9", icon: ChefHat },
-    { label: "Awaiting Dispatch", val: "6", icon: Truck },
-    { label: "Safety Score", val: "100%", icon: ShieldCheck },
-  ];
+const DAY = "2027-04-23";
 
-  const stageColors: Record<string, string> = {
-    incoming: "bg-secondary text-foreground",
-    prep: "bg-amber-100 text-amber-800",
-    packaging: "bg-indigo-100 text-indigo-800",
-    verify: "bg-emerald-100 text-emerald-800",
-  };
+function KitchenDashboard() {
+  const runs = DEMO.runs.filter((r) => r.date === DAY).sort((a, b) => a.slot - b.slot);
+  const kits = runs.reduce((n, r) => n + r.kitIds.length, 0);
+  const swabs = runs.flatMap((r) => clearanceById(r.clearanceId)!.swabs);
+  const stats = [
+    { label: "Runs today", val: runs.length, icon: ChefHat },
+    { label: "Kit-equivalents", val: kits, icon: Package },
+    { label: "Swabs taken", val: swabs.length, icon: ShieldCheck },
+    { label: "Swab detections", val: swabs.filter((s) => s.detected).length, icon: Truck },
+  ];
 
   return (
     <SiteShell>
-      <PageHeader eyebrow="Partner Kitchen Console" title="LHR Kitchen 04 — Live Operations" description="Heathrow Terminal 5 · Shift A · 06:00–14:00" />
+      <PageHeader eyebrow="Partner kitchen run sheet" title={`${fmtDay(DAY)} · production day`} description={`${KITCHEN}. Most restrictive exclusion sets first, after the deepest clean.`} />
+      <JaapNav />
       <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
+        <SimulatedBanner />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((s) => (
             <div key={s.label} className="rounded-2xl border border-brand-border bg-card p-5 flex items-center justify-between">
               <div>
-                <p className="text-2xl font-display font-extrabold">{s.val}</p>
+                <p className="text-3xl font-display font-extrabold">{s.val}</p>
                 <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
               </div>
-              <div className="size-11 rounded-xl bg-brand-accent/10 grid place-items-center text-brand-accent">
+              <div className="size-11 rounded-xl bg-brand-accent/10 text-brand-accent grid place-items-center">
                 <s.icon className="size-5" />
               </div>
             </div>
@@ -53,58 +51,61 @@ function KitchenDashboard() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 rounded-2xl border border-brand-border bg-card p-6">
-            <h2 className="font-display font-extrabold text-lg mb-5">Incoming Orders</h2>
+            <h2 className="font-display font-extrabold text-lg mb-5">Run sequence</h2>
             <div className="space-y-3">
-              {orders.map((o) => (
-                <div key={o.id} className="rounded-xl border border-brand-border p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-brand-accent">{o.id}</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${stageColors[o.stage]}`}>{o.stage}</span>
+              {runs.map((r) => {
+                const clr = clearanceById(r.clearanceId)!;
+                const rejected = clr.attempts.filter((a) => !a.accepted);
+                return (
+                  <div key={r.id} className={`rounded-xl border p-4 ${rejected.length ? "border-amber-300" : "border-brand-border"}`}>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-brand-accent font-mono">{r.id}</span>
+                          <SetBadge setId={r.setId} />
+                          {clr.deepClean && <Pill tone="info">Deep clean</Pill>}
+                        </div>
+                        <p className="text-sm mt-1">Excludes {setById(r.setId).excludes.join(", ").replace(/_/g, " ")}</p>
                       </div>
-                      <p className="font-semibold mt-1">{o.meal}</p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="size-3" /> {fmtTime(r.start)}–{fmtTime(r.end)} · {r.kitIds.length} KE of 55</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="size-3" /> ETA {o.eta}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {o.allergy.map((a) => (
-                        <span key={a} className="text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded uppercase flex items-center gap-1">
-                          <AlertTriangle className="size-3" /> {a}
-                        </span>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-semibold">{clr.id}:</span>
+                      {clr.attempts.map((a) => (
+                        <Pill key={a.ts} tone={a.accepted ? "ok" : "bad"}>
+                          {a.accepted ? <Check className="size-3" /> : <AlertTriangle className="size-3" />} {fmtTime(a.ts)} {a.actor} {a.accepted ? "accepted" : "rejected"}
+                        </Pill>
                       ))}
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                        o.severity === "Anaphylactic" ? "bg-red-100 text-red-800" :
-                        o.severity === "Severe" ? "bg-orange-100 text-orange-800" :
-                        o.severity === "Moderate" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-                      }`}>{o.severity}</span>
+                      <span className="text-muted-foreground">swabs {clr.swabs.filter((s) => !s.detected).length}/{clr.swabs.length} below method limit</span>
+                      {rejected.length > 0 && <Link to="/exceptions" hash="EXC-02" className="font-bold text-amber-700">EXC-02</Link>}
                     </div>
-                    <button className="text-xs font-bold text-brand-accent">Advance →</button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           <aside className="space-y-6">
             <div className="rounded-2xl border border-brand-border bg-card p-6">
-              <h3 className="font-display font-extrabold mb-4">Workflow</h3>
+              <h3 className="font-display font-extrabold mb-4">Between every run (§4.2)</h3>
               <ol className="space-y-3 text-sm">
-                {["Receive & log", "Prep in allergen-locked zone", "Photo & weight check", "QR seal application", "Dispatch handoff"].map((s, i) => (
-                  <li key={s} className="flex items-center gap-3">
-                    <span className="size-7 rounded-full bg-brand-accent/10 text-brand-accent grid place-items-center text-xs font-bold">{i + 1}</span>
+                {[
+                  "Full line clearance and documented clean, signed by a named person",
+                  "Dedicated, colour-controlled utensils, boards, containers and thermal boxes",
+                  "Verification swabs recorded against the run",
+                  "Goods-in checked against supplier allergen declarations",
+                  "Tamper-evident seal bound to the run and the kit",
+                ].map((s, i) => (
+                  <li key={s} className="flex items-start gap-3">
+                    <span className="size-7 shrink-0 rounded-full bg-brand-accent/10 text-brand-accent grid place-items-center text-xs font-bold">{i + 1}</span>
                     <span>{s}</span>
                   </li>
                 ))}
               </ol>
             </div>
-            <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
-              <Check className="size-5 text-emerald-600 mb-2" />
-              <p className="text-sm font-semibold text-emerald-900">All zones clean</p>
-              <p className="text-xs text-emerald-800/80 mt-1">Last sterility check: 09:42 · Pass</p>
+            <div className="rounded-2xl bg-secondary p-5 text-sm">
+              <p className="font-semibold">Competency register</p>
+              <p className="text-xs text-muted-foreground mt-1">The platform will not accept a clearance signature from a person with no recorded competency to give it (§13.8).</p>
             </div>
           </aside>
         </div>
