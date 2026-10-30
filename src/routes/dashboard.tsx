@@ -11,8 +11,8 @@ import { DISHES, WINDOW_TYPES } from "@/lib/jaap/protocol";
 import { legLabel } from "@/lib/jaap/engine";
 import { fmtDT, fmtDay, toMin } from "@/lib/jaap/time";
 import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { toast } from "sonner";
+import { onAuthStateChanged } from "firebase/auth";
+import { SiteShell } from "@/components/site-shell";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -43,12 +43,6 @@ function Dashboard() {
     return () => unsubscribe();
   }, [navigate]);
 
-  async function logout() {
-    await signOut(auth);
-    toast.success("Logged out");
-    navigate({ to: "/" });
-  }
-
   if (!ready) {
     return (
       <div className="min-h-screen grid place-items-center bg-background">
@@ -58,10 +52,9 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50/40 via-background to-emerald-50/30 font-sans text-foreground">
-      <div className="mx-auto max-w-[1400px] px-4 py-4 lg:px-6 lg:py-6 grid lg:grid-cols-[240px_1fr] gap-6">
-        <Sidebar onLogout={logout} email={userEmail} name={userName} />
-        <main className="min-w-0 space-y-6">
+    <SiteShell footer={false}>
+      <div className="min-h-full bg-gradient-to-br from-indigo-50/40 via-background to-emerald-50/30">
+        <div className="mx-auto max-w-[1400px] px-4 py-6 lg:px-8 space-y-6">
           <TopBar name={userName} />
           <SimulatedBanner>This account has no journeys yet. The dashboard below shows sample journey {SAMPLE.id} so you can see what it will hold; every figure is simulated demonstration data.</SimulatedBanner>
           <KPIRow />
@@ -78,72 +71,9 @@ function Dashboard() {
             <div className="lg:col-span-2"><MealPackagesCard /></div>
             <MessagesCard />
           </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-/* ------------- Sidebar ------------- */
-
-function Sidebar({ onLogout, email, name }: { onLogout: () => void; email: string; name: string }) {
-  const items: { icon: any; label: string; to: string; active?: boolean }[] = [
-    { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard", active: true },
-    { icon: Compass, label: "Itinerary", to: "/itinerary" },
-    { icon: Sparkles, label: "Meal Plan", to: "/scheduling" },
-    { icon: Utensils, label: "Meals", to: "/meals" },
-    { icon: MapPin, label: "Tracking", to: "/tracking" },
-    { icon: CalIcon, label: "Records", to: "/records" },
-    { icon: Bookmark, label: "Protocol", to: "/protocol" },
-    { icon: MessageSquare, label: "Contact", to: "/about" },
-  ];
-
-  return (
-    <aside className="hidden lg:flex flex-col rounded-3xl border border-brand-border bg-white/70 backdrop-blur-xl p-5 sticky top-6 h-[calc(100vh-3rem)]">
-      <Link to="/" className="flex items-center gap-2 mb-8 px-2">
-        <div className="size-9 rounded-xl bg-gradient-to-br from-brand-accent to-brand-primary grid place-items-center shadow-md shadow-brand-accent/30">
-          <ShieldCheck className="size-4 text-white" />
-        </div>
-        <span className="font-display text-lg font-extrabold tracking-tight">
-          SAFE<span className="text-brand-accent">MEAL</span>
-        </span>
-      </Link>
-
-      <nav className="flex-1 space-y-1">
-        {items.map((it) => (
-          <Link
-            key={it.label}
-            to={it.to}
-            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-              it.active
-                ? "bg-brand-primary text-white shadow-md shadow-brand-primary/20"
-                : "text-muted-foreground hover:bg-secondary"
-            }`}
-          >
-            <it.icon className="size-4" />
-            {it.label}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="border-t border-brand-border pt-4 space-y-1">
-        <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:bg-secondary">
-          <Settings className="size-4" /> Settings
-        </Link>
-        <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-600 hover:bg-rose-50">
-          <LogOut className="size-4" /> Logout
-        </button>
-        <div className="mt-3 flex items-center gap-3 px-2 py-2">
-          <div className="size-9 rounded-full bg-gradient-to-br from-brand-accent to-brand-primary text-white grid place-items-center font-bold text-sm">
-            {name.charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold truncate">{name}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{email}</p>
-          </div>
         </div>
       </div>
-    </aside>
+    </SiteShell>
   );
 }
 
@@ -160,7 +90,7 @@ function TopBar({ name }: { name: string }) {
         <p className="text-sm text-muted-foreground mt-1">Your journeys, kits and custody records in one place.</p>
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full border border-brand-border bg-white/80 backdrop-blur px-4 py-2 w-72">
+        <div className="hidden md:flex items-center gap-2 rounded-full border border-brand-border bg-white/80 backdrop-blur px-4 py-2 w-72">
           <Search className="size-4 text-muted-foreground" />
           <input placeholder="Search journeys and kits…" className="flex-1 bg-transparent text-sm outline-none" />
         </div>
