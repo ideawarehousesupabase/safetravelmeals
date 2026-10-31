@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFirestoreEmulator, initializeFirestore } from "firebase/firestore";
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBEiSFy80A0pSK4FJ1U-2eZIyg1k6JdHyc",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "safetravel-da87b.firebaseapp.com",
@@ -12,9 +12,19 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-68DVFZB3ZB"
 };
 
+// `vite --mode emulator` (npm run dev:emulator) points the app at the local Firebase emulators.
+export const usingEmulators = import.meta.env.VITE_USE_FIREBASE_EMULATORS === "true";
+
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Optional fields are left out of documents rather than rejected.
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 
-// Check if window is defined so analytics doesn't break SSR
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+if (usingEmulators) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8085);
+}
+
+// Analytics only in a real browser against the live project.
+export const analytics =
+  typeof window !== "undefined" && !usingEmulators ? isSupported().then((ok) => (ok ? getAnalytics(app) : null)) : null;
