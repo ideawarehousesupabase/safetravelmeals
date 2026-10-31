@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["vite", "dev", "--port", "5173", "--strictPort"],
       "port": 5173
+    },
+    {
+      "name": "web-emulator",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "dev", "--mode", "emulator", "--port", "5174", "--strictPort"],
+      "port": 5174
     }
   ]
 }

@@ -1,61 +1,93 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, LedgerTable, OutcomePill, Pill, SimulatedBanner } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, LedgerTable, OutcomePill, Pill, SampleBanner, SampleTag } from "@/components/jaap/jaap-ui";
+import { WorkspaceGate } from "@/components/workspace-gate";
 import { CheckCircle2, Circle, ShieldCheck } from "lucide-react";
-import { DEMO, FEATURED_IDS, journeyById, kitById, verifyChain, type ExceptionRecord } from "@/lib/jaap/demo";
+import { verifyChain, type ExceptionView, type Workspace } from "@/lib/processing";
+import { recordEvent } from "@/lib/data/store";
 import { ROLES, WINDOW_TYPES } from "@/lib/jaap/protocol";
 import { STAGES } from "@/lib/jaap/stages";
-import { fmtDT } from "@/lib/jaap/time";
+import { fmtDT, nowLondon } from "@/lib/jaap/time";
 
 export const Route = createFileRoute("/exceptions")({
   head: () => ({
     meta: [
       { title: "Exception Handling — SafeMeal" },
-      { name: "description", content: "How the platform holds, corrects and records failures in the Journey Allergen Assurance Protocol." },
+      { name: "description", content: "Exceptions the rule engine detected in your records, with holds, corrective steps and their assurance history." },
     ],
   }),
   component: ExceptionsPage,
 });
 
-const FILTERS = ["All", "Normal workflow", "Failed (open)", "Resolved or closed"] as const;
+const FILTERS = ["All", "Open", "Resolved or closed"] as const;
 
-function History({ e }: { e: ExceptionRecord }) {
-  const kits = e.kitIds.filter((id) => kitById(id)!.journeyId === e.journeyId || e.id === "EXC-07").slice(0, 2);
+function History({ e, ws }: { e: ExceptionView; ws: Workspace }) {
+  const kits = e.kitIds.map((id) => ws.kits.find((k) => k.kitId === id)).filter((k) => !!k).slice(0, 2);
   return (
     <div className="space-y-4">
-      {kits.map((id) => {
-        const kit = kitById(id)!;
-        // This exception's entries, plus any correction that references one of them.
-        const own = new Set(kit.ledger.filter((x) => x.data.exception === e.id).map((x) => x.seq));
-        const rows = kit.ledger.filter((x) => own.has(x.seq) || (x.corrects !== null && own.has(x.corrects)));
+      {kits.map((kit) => {
+        const own = new Set(kit!.ledger.filter((x) => x.data.exception === e.id).map((x) => x.seq));
+        const rows = kit!.ledger.filter((x) => own.has(x.seq) || (x.corrects !== null && own.has(x.corrects)));
         return (
-          <div key={id}>
+          <div key={kit!.kitId}>
             <p className="text-xs font-semibold mb-1">
-              <Link to="/records/$kitId" params={{ kitId: id }} className="font-mono text-brand-accent">{id}</Link> · {WINDOW_TYPES[kit.type].kit} · {journeyById(kit.journeyId)!.id} · chain {verifyChain(kit.ledger).ok ? "verifies" : "broken"} ({kit.ledger.length} entries)
+              <Link to="/records/$kitId" params={{ kitId: kit!.kitId }} className="font-mono text-brand-accent">{kit!.kitId}</Link> · {WINDOW_TYPES[kit!.type].kit} · chain {verifyChain(kit!.ledger).ok ? "verifies" : "broken"} ({kit!.ledger.length} entries)
             </p>
-            <LedgerTable entries={rows} highlight={() => true} />
+            {rows.length ? <LedgerTable entries={rows} highlight={() => true} /> : <p className="text-xs text-muted-foreground">Recorded on the run's clearance record.</p>}
           </div>
         );
       })}
+      {e.kitIds.length > 2 && <p className="text-xs text-muted-foreground">+{e.kitIds.length - 2} more kits in the same run carry the same entries.</p>}
     </div>
   );
 }
 
-function ExceptionCard({ e }: { e: ExceptionRecord }) {
+function Resolve({ e, uid }: { e: ExceptionView; uid: string }) {
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="mt-3 rounded-xl border border-brand-border p-3 space-y-2">
+      <p className="text-xs font-semibold">Record the outcome</p>
+      <input value={note} onChange={(x) => setNote(x.target.value)} placeholder="e.g. Kit withdrawn; traveller notified; 1 kit-equivalent credited" className="w-full rounded-lg border border-brand-border bg-background px-3 py-2 text-sm" />
+      <button
+        disabled={busy}
+        onClick={async () => {
+          if (!note.trim()) return toast.error("Describe the outcome.");
+          setBusy(true);
+          try {
+            await recordEvent(uid, { kitId: e.kitIds[0], journeyId: e.journeyId, type: "resolution", at: nowLondon(), tempC: null, sealPresented: null, releasedToTravellerId: null, resolves: e.id, actor: "Customer assurance", note: note.trim() });
+            toast.success("Outcome recorded; the original entries stay in the record");
+          } catch (x) {
+            toast.error((x as Error).message);
+          } finally {
+            setBusy(false);
+          }
+        }}
+        className="rounded-full bg-brand-primary px-4 py-2 text-xs font-bold text-white hover:bg-brand-accent disabled:opacity-60"
+      >
+        Close with this outcome
+      </button>
+    </div>
+  );
+}
+
+function ExceptionCard({ e, ws, uid }: { e: ExceptionView; ws: Workspace; uid: string }) {
   const stage = STAGES[e.stage];
+  const journey = ws.journeys.find((j) => j.id === e.journeyId);
   return (
     <div id={e.id} className="scroll-mt-24">
       <Card className={e.outcome === "Open" ? "border-red-300" : ""}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-bold text-brand-accent">
-              {e.id} · {e.type} · <Link to="/protocol" className="hover:underline">stage {stage.n} {stage.name}</Link>
+              {e.type} · <Link to="/protocol" className="hover:underline">stage {stage.n} {stage.name}</Link>
             </p>
             <h3 className="font-display text-lg font-extrabold">{e.title}</h3>
           </div>
           <div className="flex items-center gap-2">
-            <Pill tone="warn">Simulated</Pill>
+            {journey?.source === "sample" && <SampleTag />}
             <OutcomePill outcome={e.outcome} />
           </div>
         </div>
@@ -76,9 +108,9 @@ function ExceptionCard({ e }: { e: ExceptionRecord }) {
               {e.kitIds.slice(0, 8).map((id) => (
                 <Link key={id} to="/records/$kitId" params={{ kitId: id }} className="rounded bg-secondary px-1.5 py-0.5 font-mono text-xs font-bold text-brand-accent">{id}</Link>
               ))}
-              {e.kitIds.length > 8 && <span className="text-xs text-muted-foreground">+{e.kitIds.length - 8} more in the run</span>}
+              {e.kitIds.length > 8 && <span className="text-xs text-muted-foreground">+{e.kitIds.length - 8} more</span>}
             </dd>
-            {e.runId && <dd className="text-xs text-muted-foreground mt-1">{e.id === "EXC-01" ? "Rejected run" : "Run"}: <span className="font-mono">{e.runId}</span> · journey {e.journeyId}</dd>}
+            <dd className="text-xs text-muted-foreground mt-1">{e.runId ? <>Run <span className="font-mono">{e.runId}</span> · </> : null}{journey?.label}</dd>
           </div>
           <div>
             <dt className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Responsible role</dt>
@@ -96,17 +128,18 @@ function ExceptionCard({ e }: { e: ExceptionRecord }) {
                   {s.done ? <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-emerald-600" /> : <Circle className="size-4 shrink-0 mt-0.5 text-red-500" />}
                   <div>
                     <p className={s.done ? "" : "font-semibold"}>{s.action}</p>
-                    <p className="text-[11px] text-muted-foreground">{fmtDT(s.ts)} · {ROLES[s.role]}{s.done ? "" : " · open"}</p>
+                    <p className="text-[11px] text-muted-foreground">{s.done ? fmtDT(s.ts) : "Open"} · {ROLES[s.role]}</p>
                   </div>
                 </li>
               ))}
             </ol>
             <p className="mt-3 rounded-lg bg-secondary p-3 text-sm">{e.result}</p>
+            {e.resolvable && <Resolve e={e} uid={uid} />}
             <p className="mt-2 text-[11px] text-muted-foreground">Plan reference {e.planRef}</p>
           </div>
           <div className="lg:col-span-3 min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">How it is recorded in the assurance history</p>
-            <History e={e} />
+            <History e={e} ws={ws} />
           </div>
         </div>
       </Card>
@@ -114,61 +147,68 @@ function ExceptionCard({ e }: { e: ExceptionRecord }) {
   );
 }
 
-function NormalWorkflow() {
-  const kit = DEMO.kits.find((k) => k.journeyId === FEATURED_IDS.business && k.type === "lunch")!;
+function Exceptions({ ws, uid }: { ws: Workspace; uid: string }) {
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
+  const list = ws.exceptions.filter((e) => (filter === "All" ? true : filter === "Open" ? e.outcome === "Open" : e.outcome !== "Open"));
+  const count = (o: string) => ws.exceptions.filter((e) => e.outcome === o).length;
+  const clean = ws.kits.find((k) => !k.exceptionIds.length && k.status === "Receipt confirmed");
   return (
-    <Card>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold text-brand-accent">Reference · normal workflow</p>
-          <h3 className="font-display text-lg font-extrabold">{kit.id}: every check passes first time</h3>
-          <p className="text-sm text-muted-foreground mt-1">The same business journey as EXC-04 and EXC-07. This kit went through every stage with no exception, so its chain is a straight line from window to receipt.</p>
-        </div>
-        <Pill tone="ok"><ShieldCheck className="size-3" /> No exceptions</Pill>
+    <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
+      {ws.hasSample && <SampleBanner />}
+      <div className="flex flex-wrap items-center gap-2">
+        {FILTERS.map((f) => (
+          <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === f ? "border-brand-accent bg-brand-accent/10 text-brand-accent" : "border-brand-border"}`}>
+            {f}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-muted-foreground">
+          {ws.exceptions.length} exceptions · {count("Open")} open · {count("Resolved")} resolved · {count("Closed with recorded outcome")} closed with outcome
+        </span>
       </div>
-      <div className="mt-4">
-        <LedgerTable entries={kit.ledger} />
-      </div>
-    </Card>
+
+      {ws.exceptions.length === 0 && (
+        <Card>
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="size-6 text-emerald-600" />
+            <div>
+              <p className="font-display text-lg font-extrabold">No exceptions detected</p>
+              <p className="text-sm text-muted-foreground">The engine checks every clearance, receipt, seal, temperature, release and deadline in your records. Anything outside the protocol appears here automatically.</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {filter !== "Open" && clean && (
+        <Card>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-brand-accent">Reference · normal workflow</p>
+              <h3 className="font-display text-lg font-extrabold">{clean.kitId}: every check passed first time</h3>
+            </div>
+            <Pill tone="ok"><ShieldCheck className="size-3" /> No exceptions</Pill>
+          </div>
+          <div className="mt-4">
+            <LedgerTable entries={clean.ledger} />
+          </div>
+        </Card>
+      )}
+      {list.map((e) => (
+        <ExceptionCard key={e.id} e={e} ws={ws} uid={uid} />
+      ))}
+    </div>
   );
 }
 
 function ExceptionsPage() {
-  const [filter, setFilter] = useState<(typeof FILTERS)[number]>("All");
-  const list = DEMO.exceptions.filter((e) =>
-    filter === "All" ? true : filter === "Failed (open)" ? e.outcome === "Open" : filter === "Resolved or closed" ? e.outcome !== "Open" : false,
-  );
-  const count = (o: string) => DEMO.exceptions.filter((e) => e.outcome === o).length;
-
   return (
     <SiteShell>
       <PageHeader
         eyebrow="Exception handling · JAAP stages 5–9"
         title="When something goes wrong"
-        description="The record does not prove a kit is safe. It proves the chain of custody is complete and unaltered, and makes an incomplete chain visible instead of silent (§4.3). Each example shows the trigger, the hold, the corrective workflow and the entries it leaves behind."
+        description="The record does not prove a kit is safe. It proves the chain of custody is complete and unaltered, and makes an incomplete chain visible instead of silent (§4.3). The rule engine raises each exception from your records; closing one never erases its original entries."
       />
       <JaapNav />
-      <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        <SimulatedBanner>
-          These exceptions are fictional scenarios written into the simulated records to demonstrate the platform's responses. They did not happen. A resolved exception keeps its original entries: corrections are new entries that reference the ones they correct.
-        </SimulatedBanner>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {FILTERS.map((f) => (
-            <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === f ? "border-brand-accent bg-brand-accent/10 text-brand-accent" : "border-brand-border"}`}>
-              {f}
-            </button>
-          ))}
-          <span className="ml-auto text-xs text-muted-foreground">
-            {DEMO.exceptions.length} exceptions · {count("Resolved")} resolved · {count("Closed with recorded outcome")} closed with outcome · {count("Open")} open
-          </span>
-        </div>
-
-        {(filter === "All" || filter === "Normal workflow") && <NormalWorkflow />}
-        {list.map((e) => (
-          <ExceptionCard key={e.id} e={e} />
-        ))}
-      </div>
+      <WorkspaceGate>{(ws, uid) => <Exceptions ws={ws} uid={uid} />}</WorkspaceGate>
     </SiteShell>
   );
 }

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { FlaskConical, Info, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import type { ReactNode } from "react";
-import type { LedgerEntry } from "@/lib/jaap/demo";
+import type { LedgerEntry } from "@/lib/processing";
 import { setById } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
 
@@ -12,6 +12,7 @@ const tabs = [
   { to: "/records", label: "Meal-kit records" },
   { to: "/validation", label: "Validation" },
   { to: "/exceptions", label: "Exceptions" },
+  { to: "/import", label: "Import data" },
 ] as const;
 
 export function JaapNav() {
@@ -35,19 +36,19 @@ export function JaapNav() {
   );
 }
 
-export function SimulatedBanner({ children }: { children?: ReactNode }) {
+export function SampleBanner() {
   return (
-    <div className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900 flex gap-3">
-      <FlaskConical className="size-5 shrink-0 mt-0.5" />
-      <div>
-        <p className="font-bold uppercase tracking-wide text-xs">Simulated demonstration data</p>
-        <p className="mt-1">
-          {children ??
-            "Journeys, runs, swabs, temperatures and handovers on this page are fictional. They are processed by the platform's real rule engine, scheduler and hash chain, but they are not laboratory testing, food safety certification, independent validation or live operational evidence."}
-        </p>
-      </div>
+    <div className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm text-amber-900 flex gap-3">
+      <FlaskConical className="size-5 shrink-0" />
+      <p>
+        Some records in your account are <strong>sample data</strong> you loaded. They are processed exactly like your own input; remove them any time from Import data.
+      </p>
     </div>
   );
+}
+
+export function SampleTag() {
+  return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">Sample</span>;
 }
 
 export function CapabilityNote({ children }: { children: ReactNode }) {
@@ -90,7 +91,7 @@ export function Pill({ tone, children }: { tone: keyof typeof PILL; children: Re
 }
 
 export function KitStatusPill({ status }: { status: string }) {
-  return <Pill tone={status === "Withdrawn" ? "bad" : "ok"}>{status}</Pill>;
+  return <Pill tone={KitStatusTone(status)}>{status}</Pill>;
 }
 
 export function OutcomePill({ outcome }: { outcome: string }) {
@@ -105,6 +106,10 @@ export function OutcomePill({ outcome }: { outcome: string }) {
 
 export const ACTOR_TONE = (to: string) =>
   ["held", "withdrawn", "unconfirmed"].includes(to) ? "bad" : to === "receipt confirmed" ? "ok" : "info";
+
+export function KitStatusTone(status: string): "ok" | "warn" | "bad" | "info" {
+  return status === "Withdrawn" || status === "On hold" ? "bad" : status === "Receipt confirmed" ? "ok" : status === "Planned" ? "info" : "warn";
+}
 
 export function LedgerTable({
   entries,

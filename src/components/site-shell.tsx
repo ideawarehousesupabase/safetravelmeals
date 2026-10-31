@@ -19,6 +19,7 @@ import {
   PanelLeftOpen,
   Plus,
   ShieldCheck,
+  Upload,
   Utensils,
   Workflow,
   X,
@@ -48,6 +49,7 @@ const sidebarSections = [
       { to: "/scheduling", label: "Meal Plan", icon: Calendar },
       { to: "/meals", label: "Meals", icon: Utensils },
       { to: "/tracking", label: "Tracking", icon: MapPin },
+      { to: "/import", label: "Import data", icon: Upload },
     ],
   },
   {
