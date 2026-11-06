@@ -42,37 +42,37 @@ const navLinks = [
 // Sidebar sections for every page inside the app shell.
 const sidebarSections = [
   {
-    title: "Traveller Journey",
+    title: "Traveller",
     items: [
-      { to: "/dashboard", label: "Traveller Dashboard", icon: LayoutDashboard },
-      { to: "/itinerary", label: "Itinerary Planner", icon: Compass },
-      { to: "/scheduling", label: "Exposure Meal Plan", icon: Calendar },
-      { to: "/meals", label: "Cook-Freeze Menu", icon: Utensils },
-      { to: "/tracking", label: "Kit Handover Tracking", icon: MapPin },
-      { to: "/import", label: "Import & Sample Data", icon: Upload },
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/itinerary", label: "Itinerary", icon: Compass },
+      { to: "/scheduling", label: "Meal Plan", icon: Calendar },
+      { to: "/meals", label: "Meal Menu", icon: Utensils },
+      { to: "/tracking", label: "Kit Tracking", icon: MapPin },
+      { to: "/import", label: "Sample Data", icon: Upload },
     ],
   },
   {
-    title: "JAAP Endorsement Audit",
+    title: "JAAP protocol",
     items: [
-      { to: "/protocol", label: "1. Workflow Diagram", icon: Workflow },
-      { to: "/rules", label: "2. Rule Matrix", icon: ListChecks },
-      { to: "/records", label: "3. Sample Kit Records", icon: FileText },
-      { to: "/validation", label: "4. Test Results & Gate", icon: FlaskConical },
-      { to: "/exceptions", label: "5. Exception Handling", icon: AlertTriangle },
+      { to: "/protocol", label: "Workflow", icon: Workflow },
+      { to: "/rules", label: "Rule Matrix", icon: ListChecks },
+      { to: "/records", label: "Kit Records", icon: FileText },
+      { to: "/validation", label: "Validation", icon: FlaskConical },
+      { to: "/exceptions", label: "Exceptions", icon: AlertTriangle },
     ],
   },
   {
-    title: "Operations & Delivery",
+    title: "Operations",
     items: [
-      { to: "/kitchen", label: "Kitchen Run Sheet", icon: ChefHat },
-      { to: "/hotel", label: "Hotel Front Desk", icon: Hotel },
-      { to: "/admin", label: "Operations Overview", icon: Gauge },
+      { to: "/kitchen", label: "Kitchen Runs", icon: ChefHat },
+      { to: "/hotel", label: "Hotel Handover", icon: Hotel },
+      { to: "/admin", label: "Overview", icon: Gauge },
     ],
   },
   {
     title: "Company",
-    items: [{ to: "/about", label: "About & contact", icon: Info }],
+    items: [{ to: "/about", label: "About & Contact", icon: Info }],
   },
 ] as const;
 
