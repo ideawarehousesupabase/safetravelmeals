@@ -126,7 +126,12 @@ function OnboardingPage() {
 
           <button
             type="button"
-            onClick={() => navigate({ to: "/dashboard" })}
+            onClick={() => {
+              try {
+                localStorage.setItem("safemeal.assessorPreview", "1");
+              } catch {}
+              navigate({ to: "/dashboard" });
+            }}
             className="w-full rounded-full border-2 border-brand-accent/40 bg-brand-accent/5 px-5 py-3 text-sm font-bold text-brand-primary flex items-center justify-center gap-2 hover:bg-brand-accent hover:text-white transition-all shadow-sm"
           >
             <ShieldCheck className="size-4 text-brand-accent" /> Explore Demo as Assessor (Instant Access)

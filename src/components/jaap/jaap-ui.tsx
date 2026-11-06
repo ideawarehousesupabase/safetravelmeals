@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { FlaskConical, Info, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import type { ReactNode } from "react";
-import type { LedgerEntry } from "@/lib/jaap/demo";
+import type { LedgerEntry } from "@/lib/processing";
 import { setById } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
 
@@ -12,6 +12,7 @@ const tabs = [
   { to: "/validation", label: "4. Test Results" },
   { to: "/exceptions", label: "5. Exception Handling" },
   { to: "/itinerary", label: "Itinerary Planner" },
+  { to: "/import", label: "Import Data" },
 ] as const;
 
 export function JaapNav() {
@@ -30,6 +31,21 @@ export function JaapNav() {
             {t.label}
           </Link>
         ))}
+      </div>
+    </div>
+  );
+}
+
+export function SampleBanner({ children }: { children?: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-sky-300 bg-sky-50/80 px-5 py-3 text-sm text-sky-950 flex gap-3 shadow-sm">
+      <FlaskConical className="size-5 shrink-0 text-sky-600 mt-0.5" />
+      <div>
+        {children ?? (
+          <p>
+            Some records in your account are <strong>pre-registered validation data (§5.4)</strong>. They are processed through the deterministic rule engine exactly like your own input; manage them from the Import page.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -55,6 +71,10 @@ export function SimulatedBanner({ children }: { children?: ReactNode }) {
       </div>
     </div>
   );
+}
+
+export function SampleTag() {
+  return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">Sample</span>;
 }
 
 export function CapabilityNote({ children }: { children: ReactNode }) {
@@ -97,7 +117,7 @@ export function Pill({ tone, children }: { tone: keyof typeof PILL; children: Re
 }
 
 export function KitStatusPill({ status }: { status: string }) {
-  return <Pill tone={status === "Withdrawn" ? "bad" : "ok"}>{status}</Pill>;
+  return <Pill tone={KitStatusTone(status)}>{status}</Pill>;
 }
 
 export function OutcomePill({ outcome }: { outcome: string }) {
@@ -112,6 +132,10 @@ export function OutcomePill({ outcome }: { outcome: string }) {
 
 export const ACTOR_TONE = (to: string) =>
   ["held", "withdrawn", "unconfirmed"].includes(to) ? "bad" : to === "receipt confirmed" ? "ok" : "info";
+
+export function KitStatusTone(status: string): "ok" | "warn" | "bad" | "info" {
+  return status === "Withdrawn" || status === "On hold" ? "bad" : status === "Receipt confirmed" ? "ok" : status === "Planned" ? "info" : "warn";
+}
 
 export function LedgerTable({
   entries,

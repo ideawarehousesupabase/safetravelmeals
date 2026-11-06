@@ -16,6 +16,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ExceptionsRouteImport } from './routes/exceptions'
 import { Route as HotelRouteImport } from './routes/hotel'
+import { Route as ImportRouteImport } from './routes/import'
 import { Route as ItineraryRouteImport } from './routes/itinerary'
 import { Route as KitchenRouteImport } from './routes/kitchen'
 import { Route as MealsRouteImport } from './routes/meals'
@@ -61,6 +62,11 @@ const ExceptionsRoute = ExceptionsRouteImport.update({
 const HotelRoute = HotelRouteImport.update({
   id: '/hotel',
   path: '/hotel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportRoute = ImportRouteImport.update({
+  id: '/import',
+  path: '/import',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ItineraryRoute = ItineraryRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
+  '/import': typeof ImportRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
+  '/import': typeof ImportRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
@@ -168,6 +176,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/exceptions': typeof ExceptionsRoute
   '/hotel': typeof HotelRoute
+  '/import': typeof ImportRoute
   '/itinerary': typeof ItineraryRoute
   '/kitchen': typeof KitchenRoute
   '/meals': typeof MealsRoute
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exceptions'
     | '/hotel'
+    | '/import'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exceptions'
     | '/hotel'
+    | '/import'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exceptions'
     | '/hotel'
+    | '/import'
     | '/itinerary'
     | '/kitchen'
     | '/meals'
@@ -251,6 +263,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExceptionsRoute: typeof ExceptionsRoute
   HotelRoute: typeof HotelRoute
+  ImportRoute: typeof ImportRoute
   ItineraryRoute: typeof ItineraryRoute
   KitchenRoute: typeof KitchenRoute
   MealsRoute: typeof MealsRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/hotel'
       fullPath: '/hotel'
       preLoaderRoute: typeof HotelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/import': {
+      id: '/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof ImportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/itinerary': {
@@ -403,6 +423,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExceptionsRoute: ExceptionsRoute,
   HotelRoute: HotelRoute,
+  ImportRoute: ImportRoute,
   ItineraryRoute: ItineraryRoute,
   KitchenRoute: KitchenRoute,
   MealsRoute: MealsRoute,

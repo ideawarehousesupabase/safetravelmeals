@@ -7,6 +7,7 @@ import {
   type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
+import { WorkspaceProvider } from "@/lib/data/workspace-provider";
 
 function NotFoundComponent() {
   return (
@@ -76,7 +77,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <WorkspaceProvider>
+        <Outlet />
+      </WorkspaceProvider>
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );

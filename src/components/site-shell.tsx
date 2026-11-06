@@ -19,6 +19,7 @@ import {
   PanelLeftOpen,
   Plus,
   ShieldCheck,
+  Upload,
   Utensils,
   Workflow,
   X,
@@ -43,11 +44,12 @@ const sidebarSections = [
   {
     title: "Traveller Journey",
     items: [
+      { to: "/dashboard", label: "Traveller Dashboard", icon: LayoutDashboard },
       { to: "/itinerary", label: "Itinerary Planner", icon: Compass },
       { to: "/scheduling", label: "Exposure Meal Plan", icon: Calendar },
       { to: "/meals", label: "Cook-Freeze Menu", icon: Utensils },
       { to: "/tracking", label: "Kit Handover Tracking", icon: MapPin },
-      { to: "/dashboard", label: "Traveller Dashboard", icon: LayoutDashboard },
+      { to: "/import", label: "Import & Sample Data", icon: Upload },
     ],
   },
   {

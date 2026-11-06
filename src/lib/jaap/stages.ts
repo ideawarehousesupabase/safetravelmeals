@@ -1,5 +1,6 @@
 // The ten stages of the JAAP workflow as the platform executes them (§4, §13.1).
 import type { Role } from "./protocol";
+import type { ExceptionKind } from "../processing/types";
 
 export type Stage = {
   n: number;
@@ -11,7 +12,7 @@ export type Stage = {
   check: string;
   onFail: string;
   failState: string;
-  exceptionIds: string[];
+  exceptionKinds: ExceptionKind[];
   role: Role;
   planRef: string;
 };
@@ -27,7 +28,7 @@ export const STAGES: Stage[] = [
     check: "Structured intake: every leg has a time, a place and a type; times are in order.",
     onFail: "Incomplete or contradictory legs are returned to the traveller or coordinator; no windows are generated from an invalid itinerary.",
     failState: "Intake incomplete",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "coordinator",
     planRef: "§4.1, §5.3",
   },
@@ -41,7 +42,7 @@ export const STAGES: Stage[] = [
     check: "Every allergen in the profile is excluded by a published exclusion set.",
     onFail: "If no set covers the profile, the order is refused with an honest answer at the point of order. Nothing is produced on a best-efforts basis.",
     failState: "Refused: profile not covered",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "platform",
     planRef: "§4.7, §4.8, §13.5",
   },
@@ -55,7 +56,7 @@ export const STAGES: Stage[] = [
     check: "Each window cites the rule and the itinerary facts that fired it; the traveller confirms or removes each window.",
     onFail: "A leg the rules cannot evaluate (missing time or place) is flagged to the coordinator instead of being guessed.",
     failState: "Window needs coordinator review",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "platform",
     planRef: "§4.1",
   },
@@ -69,7 +70,7 @@ export const STAGES: Stage[] = [
     check: "The kit plan fits a product allowance (kit-equivalents and handovers) or goes to the coordinator for a quote.",
     onFail: "Plans outside an allowance are quoted by the coordinator; no kit is scheduled without a confirmed plan.",
     failState: "Awaiting coordinator quote",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "coordinator",
     planRef: "§4.6",
   },
@@ -81,9 +82,9 @@ export const STAGES: Stage[] = [
     receives: ["Kit IDs", "Exclusion set", "Handover windows"],
     produces: ["Run ID", "Run sequence", "Kit-to-run binding"],
     check: "A kit can only enter a run whose exclusion set covers the kit's profile; capacity and use-by are enforced.",
-    onFail: "A wrong-set assignment is rejected and the kit is held before production (EXC-01).",
+    onFail: "The scheduler only places a kit in a run whose set covers its profile. If the profile is edited after production, the produced kit is held and re-planned.",
     failState: "HOLD: assignment rejected",
-    exceptionIds: ["EXC-01"],
+    exceptionKinds: ["profile-changed"],
     role: "platform",
     planRef: "§4.2, §5.3",
   },
@@ -95,9 +96,9 @@ export const STAGES: Stage[] = [
     receives: ["Run ID"],
     produces: ["Clearance ID", "Swab results", "Declaration references", "Signatory"],
     check: "The signatory has recorded competency; every checklist step is complete; swabs are below the method limit.",
-    onFail: "The run is blocked and every kit in it held until a competent signatory completes the clearance (EXC-02).",
+    onFail: "The run is blocked and every kit in it held until a competent signatory completes the clearance and swabs pass.",
     failState: "BLOCKED: clearance not accepted",
-    exceptionIds: ["EXC-02"],
+    exceptionKinds: ["clearance", "swab", "no-clearance"],
     role: "supervisor",
     planRef: "§4.2, §13.8",
   },
@@ -111,7 +112,7 @@ export const STAGES: Stage[] = [
     check: "The seal number is bound to exactly one kit and one run before dispatch.",
     onFail: "A kit without a bound seal cannot be dispatched.",
     failState: "Not dispatchable",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "kitchen",
     planRef: "§4.2 item 6, §13.7",
   },
@@ -123,9 +124,9 @@ export const STAGES: Stage[] = [
     receives: ["Seal number", "Declared window", "Destination"],
     produces: ["Receipt entry", "Seal check", "Temperature", "On-window result"],
     check: "Receipt inside the window, seal intact and matching, temperature in the declared range, entry made by the receiving party.",
-    onFail: "The kit is held or quarantined and the exception is written to the chain (EXC-03 to EXC-06).",
+    onFail: "The kit is held or quarantined and the exception is written to the chain.",
     failState: "HOLD / QUARANTINE",
-    exceptionIds: ["EXC-03", "EXC-04", "EXC-05", "EXC-06"],
+    exceptionKinds: ["seal", "missing-receipt", "late", "temperature"],
     role: "hotel",
     planRef: "§4.3, §10.7, §13.7",
   },
@@ -137,9 +138,9 @@ export const STAGES: Stage[] = [
     receives: ["Kit ID", "Traveller key"],
     produces: ["Release entry", "Receipt confirmation"],
     check: "The kit belongs to this traveller and its exclusion set covers their profile.",
-    onFail: "DO NOT CONSUME is shown, the kit is quarantined and the correct kit released (EXC-07).",
+    onFail: "A release to the wrong traveller quarantines the kit; a reported reaction holds it for review.",
     failState: "DO NOT CONSUME",
-    exceptionIds: ["EXC-07"],
+    exceptionKinds: ["substitution", "reaction"],
     role: "traveller",
     planRef: "§4.4",
   },
@@ -153,7 +154,7 @@ export const STAGES: Stage[] = [
     check: "Recomputing each hash from the entries reproduces the chain; corrections are new entries that reference the original.",
     onFail: "An altered or removed entry breaks every later hash, so the chain shows exactly where it was changed.",
     failState: "CHAIN BROKEN",
-    exceptionIds: [],
+    exceptionKinds: [],
     role: "platform",
     planRef: "§4.3, §7.7",
   },

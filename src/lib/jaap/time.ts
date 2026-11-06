@@ -37,3 +37,21 @@ export const fmtRange = (a: Naive, b: Naive) =>
   dateOf(a) === dateOf(b) ? `${fmtDay(a)} · ${fmtTime(a)}–${fmtTime(b)}` : `${fmtDT(a)} → ${fmtDT(b)}`;
 
 export const fmtDuration = (min: number) => `${Math.floor(min / 60)}h ${String(min % 60).padStart(2, "0")}m`;
+
+// The current Europe/London wall-clock time as a Naive string.
+export function nowLondon(date = new Date()): Naive {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(date)
+      .map((p) => [p.type, p.value]),
+  );
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}

@@ -1,0 +1,71 @@
+rules_version = '2';
+
+// Every account's data lives under users/{uid} and is visible only to that signed-in user.
+// Custody events are append-only: they can be created and (for erasure) deleted, never edited.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function data() {
+      return request.resource.data;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /travellers/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().id == id
+          && data().label is string && data().label.size() > 0 && data().label.size() <= 200
+          && data().allergens is list && data().allergens.size() > 0 && data().allergens.size() <= 14;
+      }
+
+      match /journeys/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && data().id == id
+          && data().travellerId is string
+          && data().legs is list && data().legs.size() <= 50
+          && data().persons is number && data().persons >= 1 && data().persons <= 6
+          && data().status in ['draft', 'confirmed'];
+      }
+
+      // Derived plans, written by the app's processing engine.
+      match /plans/{journeyId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && data().journeyId == journeyId && data().inputHash is string;
+      }
+
+      match /staff/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && data().name is string && data().clearanceCompetent is bool;
+      }
+
+      match /clearances/{runId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && data().runId == runId && data().attempts is list && data().swabs is list;
+      }
+
+      match /events/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && data().id == id
+          && data().kitId is string
+          && data().type in ['dispatch', 'receipt', 'release', 'confirm', 'reaction', 'resolution']
+          && data().at is string && data().recordedAt is string;
+        allow update: if false;
+      }
+    }
+
+    // Contact form: anyone may send a message; nobody can read them back from the app.
+    match /contacts/{id} {
+      allow create: if data().keys().hasOnly(['name', 'email', 'subject', 'message', 'createdAt'])
+        && data().name is string && data().name.size() <= 200
+        && data().email is string && data().email.size() <= 320
+        && data().message is string && data().message.size() <= 5000;
+      allow read, update, delete: if false;
+    }
+  }
+}

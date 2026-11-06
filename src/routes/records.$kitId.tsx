@@ -1,19 +1,15 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, KitStatusPill, LedgerTable, OutcomePill, SetBadge, SimulatedBanner } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, KitStatusPill, LedgerTable, OutcomePill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { WorkspaceGate } from "@/components/workspace-gate";
 import { AlertTriangle, ArrowDown, ArrowLeft, Check, Download, ShieldCheck, ShieldX, X } from "lucide-react";
-import { exceptionById, journeyById, kitById, verifyChain, type LedgerEntry } from "@/lib/jaap/demo";
+import { verifyChain, type KitView, type LedgerEntry, type Workspace } from "@/lib/processing";
 import { kitStages, type StageStatus } from "@/lib/jaap/follow";
 import { STAGES } from "@/lib/jaap/stages";
 import { WINDOW_TYPES } from "@/lib/jaap/protocol";
 
 export const Route = createFileRoute("/records/$kitId")({
-  loader: ({ params }) => {
-    const kit = kitById(params.kitId);
-    if (!kit) throw notFound();
-    return { kitId: kit.id };
-  },
   head: ({ params }) => ({ meta: [{ title: `${params.kitId} assurance record — SafeMeal` }] }),
   component: KitRecordPage,
 });
@@ -26,10 +22,31 @@ const ICON: Record<StageStatus, { Icon: typeof Check; cls: string; label: string
 };
 
 function KitRecordPage() {
-  const { kitId } = Route.useLoaderData();
-  const kit = kitById(kitId)!;
-  const j = journeyById(kit.journeyId)!;
-  const stages = useMemo(() => kitStages(kit), [kit]);
+  const { kitId } = Route.useParams();
+  return (
+    <SiteShell>
+      <WorkspaceGate>
+        {(ws) => {
+          const kit = ws.kits.find((k) => k.kitId === kitId);
+          if (!kit)
+            return (
+              <div className="mx-auto max-w-7xl px-6 py-16 text-center">
+                <p className="font-display text-2xl font-extrabold">Kit {kitId} is not in your account</p>
+                <p className="mt-2 text-sm text-muted-foreground">It may belong to a journey that was edited or deleted.</p>
+                <Link to="/records" search={{ journey: undefined }} className="mt-4 inline-block font-bold text-brand-accent">All records →</Link>
+              </div>
+            );
+          return <KitRecord ws={ws} kit={kit} />;
+        }}
+      </WorkspaceGate>
+    </SiteShell>
+  );
+}
+
+function KitRecord({ ws, kit }: { ws: Workspace; kit: KitView }) {
+  const kitId = kit.kitId;
+  const j = ws.journeys.find((x) => x.id === kit.journeyId)!;
+  const stages = useMemo(() => kitStages(ws, kit), [ws, kit]);
   const [tamperSeq, setTamperSeq] = useState<number | null>(null);
   const [checked, setChecked] = useState(false);
   const [forKit, setForKit] = useState(kitId);
@@ -45,26 +62,26 @@ function KitRecordPage() {
     [kit, tamperSeq],
   );
   const result = verifyChain(shown);
-  const siblings = j.kitIds;
-  const idx = siblings.indexOf(kit.id);
+  const siblings = ws.kits.filter((k) => k.journeyId === j.id).map((k) => k.kitId);
+  const idx = siblings.indexOf(kit.kitId);
 
   const exportChain = () => {
     const blob = new Blob(
-      [JSON.stringify({ note: "SIMULATED DEMONSTRATION DATA", kit: kit.id, journey: j.id, traveller: j.travellerKey, hashAlgorithm: "SHA-256 over the JSON array of entry fields", entries: kit.ledger }, null, 2)],
+      [JSON.stringify({ kit: kit.kitId, journey: j.id, traveller: kit.travellerId, source: kit.source, hashAlgorithm: "SHA-256 over the JSON array of entry fields", entries: kit.ledger }, null, 2)],
       { type: "application/json" },
     );
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `${kit.id}-assurance-chain.json`;
+    a.download = `${kit.kitId}-assurance-chain.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
 
   return (
-    <SiteShell>
+    <>
       <PageHeader
-        eyebrow={`Meal-kit record · ${j.id}`}
-        title={`${kit.id} · ${WINDOW_TYPES[kit.type].kit}`}
+        eyebrow={`Meal-kit record · ${j.label}`}
+        title={`${kit.kitId} · ${WINDOW_TYPES[kit.type].kit}`}
         description={`${kit.dish}. ${j.label}.`}
       >
         <Link to="/records" search={{ journey: j.id }} className="rounded-full border border-brand-border px-4 py-2.5 text-sm font-bold flex items-center gap-2 hover:border-brand-accent">
@@ -74,9 +91,7 @@ function KitRecordPage() {
       <JaapNav />
 
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        <SimulatedBanner>
-          This kit, its journey and every event below are fictional. The window, run binding, checks and hash chain were produced by the platform's own code from the simulated inputs.
-        </SimulatedBanner>
+        {kit.source === "sample" && <SampleBanner />}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
@@ -95,12 +110,13 @@ function KitRecordPage() {
         {kit.exceptionIds.length > 0 && (
           <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 space-y-2">
             {kit.exceptionIds.map((id) => {
-              const e = exceptionById(id)!;
+              const e = ws.exceptions.find((x) => x.id === id);
+              if (!e) return null;
               return (
                 <div key={id} className="flex flex-wrap items-center gap-2 text-sm">
                   <AlertTriangle className="size-4 text-amber-700" />
-                  <Link to="/exceptions" hash={id} className="font-bold text-amber-900 hover:underline">{id}</Link>
-                  <span>{e.type} at stage {e.stage + 1}</span>
+                  <Link to="/exceptions" hash={id} className="font-bold text-amber-900 hover:underline">{e.type}</Link>
+                  <span>at stage {e.stage + 1}</span>
                   <OutcomePill outcome={e.outcome} />
                 </div>
               );
@@ -149,7 +165,7 @@ function KitRecordPage() {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="font-display text-xl font-extrabold">Assurance record</h2>
-              <p className="text-sm text-muted-foreground">Append-only and hash-chained (§4.3, §7.7). Personal identifiers are held off-chain; the traveller appears only as {j.travellerKey}.</p>
+              <p className="text-sm text-muted-foreground">Append-only and hash-chained (§4.3, §7.7). Personal identifiers are held off-chain; the traveller appears only by an internal id ({kit.travellerId}).</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => setChecked(true)} className="rounded-full bg-brand-primary px-4 py-2 text-sm font-bold text-white hover:bg-brand-accent">Verify chain</button>
@@ -191,6 +207,6 @@ function KitRecordPage() {
           )}
         </div>
       </div>
-    </SiteShell>
+    </>
   );
 }

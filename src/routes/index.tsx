@@ -22,7 +22,8 @@ import {
 } from "lucide-react";
 import heroMeal from "@/assets/hero-meal.jpg";
 import { SiteNav, SiteFooter } from "@/components/site-shell";
-import { DEMO, FEATURED_IDS, journeyById } from "@/lib/jaap/demo";
+import { processInput, type JourneyInput, type TravellerInput } from "@/lib/processing";
+import { setById } from "@/lib/jaap/protocol";
 import { DISHES, PRODUCTS, WINDOW_TYPES } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
 
@@ -40,7 +41,26 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const SAMPLE = journeyById(FEATURED_IDS.business)!;
+// An illustrative itinerary run through the real rule engine for the hero card.
+const EXAMPLE_TRAVELLER: TravellerInput = { id: "example", label: "Example traveller", allergens: ["peanut", "sesame"], severity: "Severe", preference: "South Asian", consentVersion: "1.2", consentAt: "2026-01-01T00:00", source: "sample" };
+const EXAMPLE_JOURNEY: JourneyInput = {
+  id: "example",
+  travellerId: "example",
+  label: "Edinburgh to London, three nights",
+  persons: 1,
+  declinedWindowKeys: [],
+  accountProduct: null,
+  status: "draft",
+  createdAt: "2026-01-01T00:00",
+  source: "sample",
+  legs: [
+    { id: "f1", kind: "flight", ref: "FL 1463", from: "EDI", to: "LHR", depart: "2026-03-04T20:15", arrive: "2026-03-04T21:40", departsFromServiceArea: false },
+    { id: "h1", kind: "hotel", name: "Riverside Hotel, Greenwich", location: "Greenwich, London SE10", checkIn: "2026-03-04T22:50", checkOut: "2026-03-07T09:30" },
+    { id: "m1", kind: "meeting", title: "Client workshop", location: "Canary Wharf, London E14", start: "2026-03-05T11:30", end: "2026-03-05T15:00", catered: false },
+  ],
+};
+const EXAMPLE_PLAN = processInput(EXAMPLE_JOURNEY, EXAMPLE_TRAVELLER, "example");
+const SAMPLE = { windows: EXAMPLE_PLAN.windows, preference: EXAMPLE_TRAVELLER.preference, set: EXAMPLE_PLAN.setId ? setById(EXAMPLE_PLAN.setId) : null };
 const WINDOW_ICON = { late_arrival: Hotel, breakfast: Hotel, lunch: Briefcase, in_transit: Plane };
 
 function Hero() {
@@ -86,11 +106,11 @@ function Hero() {
           <div className="relative rounded-3xl border border-brand-border bg-card p-6 shadow-elegant">
             <div className="flex items-center justify-between mb-6 border-b border-brand-border pb-4">
               <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sample journey · {SAMPLE.id}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Example itinerary</p>
                 <h3 className="font-display font-bold text-lg">EDI → LHR · three nights in London</h3>
               </div>
               <div className="rounded-full bg-amber-100 px-3 py-1 text-[10px] font-bold text-amber-800 uppercase tracking-wider">
-                Simulated
+                Example
               </div>
             </div>
 
@@ -431,11 +451,11 @@ function CTA() {
               <Link to="/itinerary" className="rounded-full bg-brand-accent px-7 py-4 text-base font-bold text-white shadow-glow hover:bg-white hover:text-brand-primary transition-all">
                 Map my journey
               </Link>
-              <Link to="/records" className="rounded-full border border-white/20 bg-white/5 backdrop-blur px-7 py-4 text-base font-bold text-white hover:bg-white/10 transition flex items-center gap-2">
-                <Sparkles className="size-4" /> Explore sample records
+              <Link to="/records" search={{ journey: undefined }} className="rounded-full border border-white/20 bg-white/5 backdrop-blur px-7 py-4 text-base font-bold text-white hover:bg-white/10 transition flex items-center gap-2">
+                <Sparkles className="size-4" /> Open your records
               </Link>
             </div>
-            <p className="mt-6 text-xs text-white/50">{DEMO.kits.length} simulated kits across {DEMO.journeys.length} simulated journeys. Not operational data.</p>
+            <p className="mt-6 text-xs text-white/50">Sign in to keep your journeys; sample data is available if you want to explore first.</p>
           </div>
         </div>
       </div>

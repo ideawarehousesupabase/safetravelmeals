@@ -1,12 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   LayoutDashboard, Plane, Hotel, Train, Utensils, Calendar as CalIcon,
   MessageSquare, Settings, LogOut, Search, Bell, ChevronLeft, ChevronRight,
   TrendingUp, ShieldCheck, MapPin, Sparkles, Plus, Compass, Bookmark, Image as ImgIcon,
 } from "lucide-react";
-import { KitStatusPill, SetBadge, SimulatedBanner } from "@/components/jaap/jaap-ui";
-import { FEATURED_IDS, allergenList, journeyById, kitById } from "@/lib/jaap/demo";
+import { KitStatusPill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { WorkspaceGate } from "@/components/workspace-gate";
+import type { KitView, PlanWindow, Workspace } from "@/lib/processing";
+import type { Leg, HandoverBatch } from "@/lib/jaap/engine";
+import { ALLERGENS, productById, type Allergen, type Preference, type Product } from "@/lib/jaap/protocol";
 import { DISHES, WINDOW_TYPES } from "@/lib/jaap/protocol";
 import { legLabel } from "@/lib/jaap/engine";
 import { fmtDT, fmtDay, toMin } from "@/lib/jaap/time";
@@ -59,21 +62,7 @@ function Dashboard() {
       <div className="min-h-full bg-gradient-to-br from-indigo-50/40 via-background to-emerald-50/30">
         <div className="mx-auto max-w-[1400px] px-4 py-6 lg:px-8 space-y-6">
           <TopBar name={userName} />
-          <SimulatedBanner>This account has no journeys yet. The dashboard below shows sample journey {SAMPLE.id} so you can see what it will hold; every figure is simulated demonstration data.</SimulatedBanner>
-          <KPIRow />
-          <div className="grid lg:grid-cols-3 gap-6">
-            <RevenueCard />
-            <DestinationsCard />
-          </div>
-          <div className="grid lg:grid-cols-3 gap-6">
-            <CalendarCard />
-            <TotalTripsCard />
-            <UpcomingTripsCard />
-          </div>
-          <div className="grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2"><MealPackagesCard /></div>
-            <MessagesCard />
-          </div>
+          <WorkspaceGate>{(ws) => <DashboardBody ws={ws} />}</WorkspaceGate>
         </div>
       </div>
     </SiteShell>
@@ -107,13 +96,77 @@ function TopBar({ name }: { name: string }) {
 
 /* ------------- Sample journey ------------- */
 
-const SAMPLE = journeyById(FEATURED_IDS.business)!;
-const SAMPLE_KITS = SAMPLE.kitIds.map((id) => kitById(id)!);
+type DashJourney = {
+  id: string;
+  label: string;
+  windows: PlanWindow[];
+  batches: HandoverBatch[];
+  setId: number | null;
+  travellerKey: string;
+  allergens: Allergen[];
+  severity: string;
+  preference: Preference;
+  productInfo: Product | null;
+  legs: Leg[];
+};
+const DashCtx = createContext<{ SAMPLE: DashJourney; SAMPLE_KITS: KitView[] } | null>(null);
+const useDash = () => useContext(DashCtx)!;
+const allergenList = (xs: Allergen[]) => xs.map((a) => ALLERGENS[a]).join(", ");
+
+function DashboardBody({ ws }: { ws: Workspace }) {
+  const upcoming = ws.journeys.filter((j) => ws.kits.some((k) => k.journeyId === j.id && k.occasionStart >= ws.now));
+  const [jid, setJid] = useState((upcoming[0] ?? ws.journeys[0]).id);
+  const j = ws.journeys.find((x) => x.id === jid) ?? ws.journeys[0];
+  const t = ws.travellers.find((x) => x.id === j.travellerId);
+  const plan = ws.plansById[j.id];
+  const SAMPLE: DashJourney = {
+    id: j.id,
+    label: j.label,
+    windows: plan.windows,
+    batches: plan.batches,
+    setId: plan.setId,
+    travellerKey: t?.label ?? "",
+    allergens: t?.allergens ?? [],
+    severity: t?.severity ?? "",
+    preference: t?.preference ?? "British",
+    productInfo: plan.productId ? productById(plan.productId) : null,
+    legs: j.legs,
+  };
+  const SAMPLE_KITS = ws.kits.filter((k) => k.journeyId === j.id);
+  return (
+    <DashCtx.Provider value={{ SAMPLE, SAMPLE_KITS }}>
+      {ws.hasSample && <SampleBanner />}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Journey</span>
+        <select value={j.id} onChange={(e) => setJid(e.target.value)} className="rounded-lg border border-brand-border bg-white px-3 py-2 text-sm max-w-full">
+          {ws.journeys.map((x) => <option key={x.id} value={x.id}>{x.label} · {ws.travellers.find((y) => y.id === x.travellerId)?.label}</option>)}
+        </select>
+        <span className="text-xs text-muted-foreground">{ws.journeys.length} journeys · {ws.kits.length} kits · {ws.exceptions.filter((e) => e.outcome === "Open").length} open exceptions</span>
+      </div>
+      <KPIRow />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <RevenueCard />
+        <DestinationsCard />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <CalendarCard key={j.id} />
+        <TotalTripsCard />
+        <UpcomingTripsCard />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 min-w-0"><MealPackagesCard /></div>
+        <MessagesCard />
+      </div>
+    </DashCtx.Provider>
+  );
+}
+
 const LEG_ICON = { flight: Plane, hotel: Hotel, meeting: Compass };
 
 /* ------------- KPI ------------- */
 
 function KPIRow() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   const stats = [
     { label: "Exposure windows mapped", val: SAMPLE.windows.length, icon: Compass, tint: "from-indigo-100 to-indigo-50", color: "text-indigo-600" },
     { label: "Kits in plan", val: SAMPLE_KITS.length, icon: Utensils, tint: "from-emerald-100 to-emerald-50", color: "text-emerald-600" },
@@ -138,6 +191,7 @@ function KPIRow() {
 /* ------------- Exposure windows ------------- */
 
 function RevenueCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   return (
     <div className="lg:col-span-2 rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -165,6 +219,7 @@ function RevenueCard() {
 /* ------------- Allergen profile ------------- */
 
 function DestinationsCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <h3 className="font-display font-extrabold text-lg mb-1">Allergen profile</h3>
@@ -172,9 +227,9 @@ function DestinationsCard() {
       <dl className="space-y-3 text-sm">
         <div><dt className="text-xs text-muted-foreground">Diagnosed allergens</dt><dd className="font-semibold">{allergenList(SAMPLE.allergens)}</dd></div>
         <div><dt className="text-xs text-muted-foreground">Severity</dt><dd className="font-semibold">{SAMPLE.severity}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Exclusion set</dt><dd><SetBadge setId={SAMPLE.set!.id} long /></dd></div>
+        <div><dt className="text-xs text-muted-foreground">Exclusion set</dt><dd>{SAMPLE.setId ? <SetBadge setId={SAMPLE.setId} long /> : "Refused"}</dd></div>
         <div><dt className="text-xs text-muted-foreground">Menu preference</dt><dd className="font-semibold">{SAMPLE.preference}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Record key</dt><dd className="font-mono text-xs">{SAMPLE.travellerKey}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Traveller</dt><dd className="font-mono text-xs">{SAMPLE.travellerKey}</dd></div>
       </dl>
     </div>
   );
@@ -183,8 +238,10 @@ function DestinationsCard() {
 /* ------------- Calendar ------------- */
 
 function CalendarCard() {
-  const [month, setMonth] = useState(new Date(2027, 3, 1)); // April 2027, the sample journey
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   const occasionDays = SAMPLE.windows.filter((w) => w.accepted).map((w) => w.occasionStart.slice(0, 10));
+  const first = occasionDays[0] ?? new Date().toISOString().slice(0, 10);
+  const [month, setMonth] = useState(new Date(+first.slice(0, 4), +first.slice(5, 7) - 1, 1));
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
   const firstDay = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
   const cells: (number | null)[] = [
@@ -220,6 +277,7 @@ function CalendarCard() {
 /* ------------- Kit status ------------- */
 
 function TotalTripsCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   const rows: [string, number, string][] = [
     ["Receipt confirmed", SAMPLE_KITS.filter((k) => k.status === "Receipt confirmed").length, "bg-emerald-500"],
     ["Withdrawn", SAMPLE_KITS.filter((k) => k.status === "Withdrawn").length, "bg-rose-400"],
@@ -244,7 +302,7 @@ function TotalTripsCard() {
               <span>{v}</span>
             </div>
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div className={`h-full ${c}`} style={{ width: `${(v / SAMPLE_KITS.length) * 100}%` }} />
+              <div className={`h-full ${c}`} style={{ width: `${SAMPLE_KITS.length ? (v / SAMPLE_KITS.length) * 100 : 0}%` }} />
             </div>
           </div>
         ))}
@@ -256,6 +314,7 @@ function TotalTripsCard() {
 /* ------------- Itinerary ------------- */
 
 function UpcomingTripsCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -284,25 +343,26 @@ function UpcomingTripsCard() {
 /* ------------- Kits ------------- */
 
 function MealPackagesCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display font-extrabold text-lg">Your kits</h3>
-          <p className="text-xs text-muted-foreground">{SAMPLE.productInfo?.name} · {SAMPLE.productInfo?.price}</p>
+          <p className="text-xs text-muted-foreground">{SAMPLE.productInfo ? `${SAMPLE.productInfo.name} · ${SAMPLE.productInfo.price}` : "Coordinator quote"}</p>
         </div>
         <Link to="/records" search={{ journey: SAMPLE.id }} className="text-xs font-bold text-brand-accent">All records →</Link>
       </div>
       <div className="grid sm:grid-cols-3 gap-4">
         {SAMPLE_KITS.slice(0, 3).map((k) => (
-          <Link to="/records/$kitId" params={{ kitId: k.id }} key={k.id} className="group rounded-2xl border border-brand-border overflow-hidden hover:shadow-elegant transition-all hover:-translate-y-0.5">
+          <Link to="/records/$kitId" params={{ kitId: k.kitId }} key={k.kitId} className="group rounded-2xl border border-brand-border overflow-hidden hover:shadow-elegant transition-all hover:-translate-y-0.5">
             <div className="aspect-[4/3] bg-gradient-to-br from-emerald-200 to-teal-100 grid place-items-center relative">
               <ImgIcon className="size-8 text-white/80" />
               <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-widest bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-brand-primary">{k.sealNo}</span>
             </div>
             <div className="p-3">
               <p className="font-semibold text-sm">{DISHES[SAMPLE.preference][k.type]}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{WINDOW_TYPES[k.type].kit} · {k.id}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{WINDOW_TYPES[k.type].kit} · {k.kitId}</p>
               <div className="mt-1"><KitStatusPill status={k.status} /></div>
             </div>
           </Link>
@@ -315,6 +375,7 @@ function MealPackagesCard() {
 /* ------------- Record updates ------------- */
 
 function MessagesCard() {
+  const { SAMPLE, SAMPLE_KITS } = useDash();
   const entries = SAMPLE_KITS.flatMap((k) => k.ledger)
     .sort((a, b) => toMin(b.ts) - toMin(a.ts))
     .slice(0, 5);

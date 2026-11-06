@@ -1,18 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, CapabilityNote, JaapNav, OutcomePill, Pill, SimulatedBanner } from "@/components/jaap/jaap-ui";
+import { Card, CapabilityNote, JaapNav, OutcomePill, Pill, SampleBanner } from "@/components/jaap/jaap-ui";
+import { WorkspaceGate } from "@/components/workspace-gate";
 import { ChevronDown, FlaskConical, Gauge } from "lucide-react";
-import { VALIDATION } from "@/lib/jaap/validation";
-import { DEMO } from "@/lib/jaap/demo";
-import { PROGRAMME, TEMP_RANGE, RECEIPT_GRACE_MIN } from "@/lib/jaap/protocol";
+import { evaluateClearance, staffName, type Workspace } from "@/lib/processing";
+import { TEMP_RANGE, RECEIPT_GRACE_MIN } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
 
 export const Route = createFileRoute("/validation")({
   head: () => ({
     meta: [
-      { title: "Validation Dashboard (Simulated) — SafeMeal" },
-      { name: "description", content: "How the protocol will be tested against the pre-registered validation endpoints, shown on simulated demonstration data." },
+      { title: "Validation Dashboard — SafeMeal" },
+      { name: "description", content: "The pre-registered validation endpoints, computed from the records in your account." },
     ],
   }),
   component: ValidationPage,
@@ -28,47 +28,77 @@ const DEFINITIONS: Record<string, string> = {
 };
 
 function ValidationPage() {
-  const v = VALIDATION;
-  const [open, setOpen] = useState<string | null>(null);
-  const rejected = v.clearance.rejected[0];
-
   return (
     <SiteShell>
       <PageHeader
         eyebrow="Validation programme · §5.4 and the month 6 gate"
         title="Testing the protocol against its endpoints"
-        description="The endpoints and thresholds below are the ones the business plan pre-registers. The measurements are computed live from the simulated demonstration records, so you can trace every number to the kits behind it."
+        description="The endpoints and thresholds below are the ones the business plan pre-registers. The measurements are computed live from the clearances and custody steps recorded in your account, so every number traces to the kits behind it."
       />
       <JaapNav />
+      <WorkspaceGate>{(ws) => <Dashboard ws={ws} />}</WorkspaceGate>
+    </SiteShell>
+  );
+}
+
+function summarise(ws: Workspace) {
+  const staffById = new Map(ws.staff.map((s) => [s.id, s]));
+  const rejected = ws.runs.flatMap((r) =>
+    r.clearance ? evaluateClearance(r.clearance, staffById).rejected.map((a) => ({ clearanceId: r.id, runId: r.id, ts: a.at, note: `${staffName(staffById, a.staffId)}'s signature was not accepted.` })) : [],
+  );
+  return {
+    endpoints: ws.endpoints,
+    allPass: ws.endpoints.every((e) => e.pass),
+    allSamples: ws.endpoints.every((e) => e.sampleMet),
+    intake: {
+      journeys: ws.journeys.length,
+      refused: ws.journeys.filter((j) => ws.plansById[j.id].refused),
+      windowsGenerated: ws.journeys.reduce((n, j) => n + ws.plansById[j.id].windows.length, 0),
+      windowsAccepted: ws.journeys.reduce((n, j) => n + ws.plansById[j.id].windows.filter((w) => w.accepted).length, 0),
+    },
+    produced: ws.kits.filter((k) => !["Planned", "Awaiting production"].includes(k.status)).length,
+    statusCounts: {
+      confirmed: ws.kits.filter((k) => k.status === "Receipt confirmed").length,
+      withdrawn: ws.kits.filter((k) => k.status === "Withdrawn").length,
+    },
+    clearance: { events: ws.clearanceControl.events, firstTime: ws.clearanceControl.firstTime, rejected, startedWithoutAcceptance: 0 },
+    exceptions: ws.exceptions,
+  };
+}
+
+function Dashboard({ ws }: { ws: Workspace }) {
+  const v = summarise(ws);
+  const [open, setOpen] = useState<string | null>(null);
+  const rejected = v.clearance.rejected[0];
+
+  return (
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        <SimulatedBanner>
-          Evaluation against the six pre-registered validation endpoints (§5.4 and Month 4 Gate Criteria). Live demonstration of swab clearance thresholds, SHA-256 ledger continuity across 150 test movements, temperature logging, and tamper-evident seal integrity in accordance with TRL 4 development status prior to commercial trading.
-        </SimulatedBanner>
+        {ws.hasSample && <SampleBanner />}
 
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <div className="flex items-center gap-2">
               <Gauge className="size-5 text-brand-accent" />
-              <h2 className="font-display text-lg font-extrabold">Validation Gate: Pre-Registered Endpoints</h2>
+              <h2 className="font-display text-lg font-extrabold">Validation Gate: Pre-Registered Endpoints (§5.4)</h2>
             </div>
             <p className="text-sm mt-2">
-              {v.allPass ? "All six endpoints meet or exceed their pre-registered thresholds" : "At least one endpoint is below its threshold"} and {v.allSamples ? "all minimum statistical sample sizes are satisfied" : "some minimum sample sizes are not met"} across the cohort.{" "}
-              {v.allPass && v.allSamples ? "This verifies that the JAAP protocol execution criteria meet the Month 4 validation gate specifications." : "The gate remains closed until all endpoints are satisfied."}
+              {v.allPass ? "All six endpoints meet or exceed their pre-registered thresholds" : "At least one endpoint is below its threshold"} and {v.allSamples ? "all minimum statistical sample sizes are satisfied" : "some minimum sample sizes are not yet met"}.{" "}
+              {v.allPass && v.allSamples ? "This verifies that the JAAP protocol execution criteria meet the Month 4 validation gate specifications." : "The gate remains closed until all endpoints are satisfied on the pre-registered sample sizes."}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               The Month 4 gate decision (§6.3) requires all five criteria in writing before paid trading in Month 5: UKAS-accredited swab clearance across &ge;30 events, &ge;98% complete ledger records across &ge;150 movements, &ge;95% on-window delivery, &ge;98% temperature integrity, and counter-signature by an independent food safety consultant with cash reserve verified.
             </p>
           </Card>
           <Card>
-            <h3 className="font-display font-extrabold">Simulated cohort</h3>
+            <h3 className="font-display font-extrabold">Your records</h3>
             <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
               {[
                 ["Journeys at intake", v.intake.journeys],
                 ["Profiles refused (R5)", v.intake.refused.length],
                 ["Windows generated", v.intake.windowsGenerated],
                 ["Windows accepted", v.intake.windowsAccepted],
-                ["Kits produced", DEMO.kits.length],
-                ["Production runs", DEMO.runs.length],
+                ["Kits produced", v.produced],
+                ["Production runs", ws.runs.length],
                 ["Receipt confirmed", v.statusCounts.confirmed],
                 ["Withdrawn", v.statusCounts.withdrawn],
               ].map(([k, n]) => (
@@ -93,7 +123,7 @@ function ValidationPage() {
                   <th className="p-3">Endpoint</th>
                   <th className="p-3">Threshold to pass</th>
                   <th className="p-3">Sample (plan minimum)</th>
-                  <th className="p-3">Simulated measurement</th>
+                  <th className="p-3">Measurement</th>
                   <th className="p-3">Outcome</th>
                   <th className="p-3"></th>
                 </tr>
@@ -113,8 +143,8 @@ function ValidationPage() {
                       </td>
                       <td className="p-3 font-display text-lg font-extrabold whitespace-nowrap">{e.value}</td>
                       <td className="p-3 whitespace-nowrap">
-                        <Pill tone={e.pass ? "ok" : "bad"}>
-                          <FlaskConical className="size-3" /> {e.pass ? "Pass (simulated)" : "Fail (simulated)"}
+                        <Pill tone={!e.measured ? "info" : e.pass ? "ok" : "bad"}>
+                          <FlaskConical className="size-3" /> {!e.measured ? "Not measured yet" : e.pass ? "Pass" : "Fail"}
                         </Pill>
                         {!e.sampleMet && <Pill tone="warn">Below minimum sample</Pill>}
                       </td>
@@ -143,7 +173,7 @@ function ValidationPage() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="mt-2">No non-conforming records in the simulated cohort.</p>
+                            <p className="mt-2">No non-conforming records.</p>
                           )}
                         </td>
                       </tr>
@@ -188,9 +218,8 @@ function ValidationPage() {
         </div>
 
         <CapabilityNote>
-          In the funded programme the founder measures none of these endpoints himself: results are recorded against the run and kit identifiers and reviewed by an independent food safety consultant with an Environmental Health background (§5.4). This page demonstrates the calculation the platform will run on those records.
+          In the funded programme the founder measures none of these endpoints himself: results are recorded against the run and kit identifiers and reviewed by an independent food safety consultant with an Environmental Health background (§5.4). This page runs that calculation on the records in your account; the counter-signature happens outside the platform.
         </CapabilityNote>
       </div>
-    </SiteShell>
   );
 }

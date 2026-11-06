@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { CapabilityNote, Card, JaapNav, Pill, SetBadge } from "@/components/jaap/jaap-ui";
+import { CapabilityNote, Card, JaapNav, SampleTag, SetBadge } from "@/components/jaap/jaap-ui";
+import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { AlertTriangle, ArrowDown, ArrowRight, Check, CornerDownLeft, FileText, RotateCcw, X } from "lucide-react";
 import { STAGES } from "@/lib/jaap/stages";
-import { DEMO, FEATURED_IDS, exceptionById, kitById } from "@/lib/jaap/demo";
+import type { Workspace } from "@/lib/processing";
 import { kitStages, type StageStatus } from "@/lib/jaap/follow";
 import { ROLES, WINDOW_TYPES } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
@@ -25,19 +26,19 @@ const COMPONENT_STYLE = {
   "Handover record": { ring: "border-emerald-300", chip: "bg-emerald-100 text-emerald-900", label: "Component 3 · transit handover record (§4.3)" },
 } as const;
 
-// Kits chosen to show a clean run and each exception path.
-const FOLLOW = (() => {
-  const pick = (jid: string, pred: (k: (typeof DEMO.kits)[number]) => boolean) => DEMO.kits.find((k) => k.journeyId === jid && pred(k))!;
-  const normal = pick(FEATURED_IDS.business, (k) => k.type === "lunch");
-  const list = [{ id: normal.id, label: `Normal · ${normal.id} business lunch` }];
-  for (const e of DEMO.exceptions) {
-    // Prefer a kit that shows only this exception, from the exception's own journey.
-    const only = e.kitIds.filter((id) => kitById(id)!.exceptionIds.length === 1);
-    const k = kitById(only.find((id) => kitById(id)!.journeyId === e.journeyId) ?? only[0] ?? e.kitIds[0])!;
-    list.push({ id: k.id, label: `${e.id} · ${k.id} ${e.type.toLowerCase()}` });
+// Kits to follow: one with no exceptions, then one per exception the account's data produced.
+function followList(ws: Workspace) {
+  const list: { id: string; label: string }[] = [];
+  const clean = ws.kits.find((k) => !k.exceptionIds.length && k.status === "Receipt confirmed") ?? ws.kits.find((k) => !k.exceptionIds.length);
+  if (clean) list.push({ id: clean.kitId, label: `No exceptions · ${clean.kitId}` });
+  for (const e of ws.exceptions) {
+    const only = e.kitIds.filter((id) => ws.kits.find((k) => k.kitId === id)?.exceptionIds.length === 1);
+    const id = only[0] ?? e.kitIds[0];
+    if (id && !list.some((x) => x.id === id && x.label.includes(e.type))) list.push({ id, label: `${e.type} · ${id}` });
   }
+  for (const k of ws.kits) if (!list.some((x) => x.id === k.kitId)) list.push({ id: k.kitId, label: `${k.kitId} · ${k.status}` });
   return list;
-})();
+}
 
 const STATUS_STYLE: Record<StageStatus, string> = {
   ok: "bg-emerald-500 text-white",
@@ -56,11 +57,26 @@ function StatusDot({ s }: { s: StageStatus }) {
 }
 
 function ProtocolPage() {
-  const [kitId, setKitId] = useState(FOLLOW[0].id);
+  return (
+    <SiteShell>
+      <PageHeader
+        eyebrow="Journey Allergen Assurance Protocol"
+        title="From itinerary to assurance record"
+        description="The protocol is the asset; the software orchestrates it (§1). Ten stages carry one kit from the traveller's itinerary to a record they can verify. Pick a stage to see its purpose, the records it passes on and what happens when it fails."
+      />
+      <JaapNav />
+      <WorkspaceGate>{(ws, uid) => (ws.kits.length ? <Flow ws={ws} /> : <div className="mx-auto max-w-7xl px-6 py-10"><EmptyState uid={uid} title="No kits to follow yet" text="Save a journey whose traveller's allergens are covered by a published exclusion set; its kits appear here stage by stage." /></div>)}</WorkspaceGate>
+    </SiteShell>
+  );
+}
+
+function Flow({ ws }: { ws: Workspace }) {
+  const follow = useMemo(() => followList(ws), [ws]);
+  const [kitId, setKitId] = useState(follow[0].id);
   const [selected, setSelected] = useState(1);
   const [failAt, setFailAt] = useState<number | null>(null);
-  const kit = kitById(kitId)!;
-  const views = useMemo(() => kitStages(kit), [kit]);
+  const kit = ws.kits.find((k) => k.kitId === kitId) ?? ws.kits[0];
+  const views = useMemo(() => kitStages(ws, kit), [ws, kit]);
 
   // A simulated failure overrides the recorded statuses: the failing stage is held and later stages are not reached.
   const statusOf = (n: number): StageStatus => {
@@ -74,14 +90,6 @@ function ProtocolPage() {
   const style = COMPONENT_STYLE[stage.component];
 
   return (
-    <SiteShell>
-      <PageHeader
-        eyebrow="Journey Allergen Assurance Protocol"
-        title="From itinerary to assurance record"
-        description="The protocol is the asset; the software orchestrates it (§1). Ten stages carry one kit from the traveller's itinerary to a record they can verify. Pick a stage to see its purpose, the records it passes on and what happens when it fails."
-      />
-      <JaapNav />
-
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
         <div className="grid md:grid-cols-3 gap-3">
           {Object.entries(COMPONENT_STYLE).map(([k, v]) => (
@@ -102,15 +110,15 @@ function ProtocolPage() {
               }}
               className="max-w-full rounded-lg border border-brand-border bg-background px-3 py-2 text-sm"
             >
-              {FOLLOW.map((f) => (
+              {follow.map((f) => (
                 <option key={f.label} value={f.id}>
                   {f.label}
                 </option>
               ))}
             </select>
             <SetBadge setId={kit.setId} long />
-            <Pill tone="warn">Simulated data</Pill>
-            <Link to="/records/$kitId" params={{ kitId: kit.id }} className="ml-auto text-sm font-bold text-brand-accent flex items-center gap-1">
+            {kit.source === "sample" && <SampleTag />}
+            <Link to="/records/$kitId" params={{ kitId: kit.kitId }} className="ml-auto text-sm font-bold text-brand-accent flex items-center gap-1">
               Open full record <ArrowRight className="size-4" />
             </Link>
           </div>
@@ -186,7 +194,7 @@ function ProtocolPage() {
 
             <div className="mt-5">
               <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                Records for {kit.id} · {WINDOW_TYPES[kit.type].kit}
+                Records for {kit.kitId} · {WINDOW_TYPES[kit.type].kit}
               </p>
               <dl className="divide-y divide-brand-border/70 rounded-xl border border-brand-border">
                 {view.fields.map(([k, v]) => (
@@ -236,17 +244,17 @@ function ProtocolPage() {
                   <li className="flex gap-2"><FileText className="size-4 text-emerald-600 shrink-0 mt-0.5" /> The failure and the correction are both appended to the assurance record. The original entry is never edited.</li>
                 </ol>
               )}
-              {stage.exceptionIds.length > 0 && (
+              {stage.exceptionKinds.length > 0 && (
                 <div className="mt-4 border-t border-brand-border pt-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Worked examples</p>
-                  {stage.exceptionIds.map((id) => {
-                    const e = exceptionById(id)!;
-                    return (
-                      <Link key={id} to="/exceptions" hash={id} className="block text-sm text-brand-accent font-semibold hover:underline">
-                        {id} · {e.type}
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">In your records</p>
+                  {ws.exceptions.filter((e) => stage.exceptionKinds.includes(e.kind)).length === 0 && <p className="text-xs text-muted-foreground">No exceptions of this kind recorded.</p>}
+                  {ws.exceptions
+                    .filter((e) => stage.exceptionKinds.includes(e.kind))
+                    .map((e) => (
+                      <Link key={e.id} to="/exceptions" hash={e.id} className="block text-sm text-brand-accent font-semibold hover:underline">
+                        {e.type} · {e.outcome}
                       </Link>
-                    );
-                  })}
+                    ))}
                 </div>
               )}
             </Card>
@@ -262,11 +270,10 @@ function ProtocolPage() {
             </Card>
 
             <CapabilityNote>
-              Implemented in this prototype: the mapping rules, exclusion-set matching, run grouping checks and the hash chain. Simulated: production, courier, hotel and temperature events. The plan runs months 1–6 on the written protocol with manual records while the platform is built (§2.5, §5.6).
+              Every stage here is computed from records saved in your account: itineraries and profiles you entered, clearances recorded on the kitchen run sheet and custody steps recorded on the tracking page. Use the failure button to see how a stage would respond.
             </CapabilityNote>
           </div>
         </div>
       </div>
-    </SiteShell>
   );
 }
