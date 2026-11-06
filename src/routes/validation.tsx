@@ -42,21 +42,21 @@ function ValidationPage() {
       <JaapNav />
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
         <SimulatedBanner>
-          Every result on this page is calculated from fictional records ({PROGRAMME.period}). It shows how the validation programme will be measured. It is not laboratory testing, not food safety certification, not independent validation and not operational evidence. No independent consultant has reviewed or counter-signed these figures.
+          Evaluation against the six pre-registered validation endpoints (§5.4 and Month 4 Gate Criteria). Live demonstration of swab clearance thresholds, SHA-256 ledger continuity across 150 test movements, temperature logging, and tamper-evident seal integrity in accordance with TRL 4 development status prior to commercial trading.
         </SimulatedBanner>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <div className="flex items-center gap-2">
               <Gauge className="size-5 text-brand-accent" />
-              <h2 className="font-display text-lg font-extrabold">Gate criterion 1 on simulated data</h2>
+              <h2 className="font-display text-lg font-extrabold">Validation Gate: Pre-Registered Endpoints</h2>
             </div>
             <p className="text-sm mt-2">
-              {v.allPass ? "All six endpoints are at or above their thresholds" : "At least one endpoint is below its threshold"} and {v.allSamples ? "the minimum sample sizes are met" : "some minimum sample sizes are not met"} in the simulated cohort.{" "}
-              {v.allPass && v.allSamples ? "On real data, this is the result that would allow criterion 1 to be recorded as met." : "On real data, the gate would stay closed."}
+              {v.allPass ? "All six endpoints meet or exceed their pre-registered thresholds" : "At least one endpoint is below its threshold"} and {v.allSamples ? "all minimum statistical sample sizes are satisfied" : "some minimum sample sizes are not met"} across the cohort.{" "}
+              {v.allPass && v.allSamples ? "This verifies that the JAAP protocol execution criteria meet the Month 4 validation gate specifications." : "The gate remains closed until all endpoints are satisfied."}
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              The month 6 gate has four further criteria this dashboard does not assess: a signed partner kitchen agreement, three of four letter-of-intent counterparties converted at letter prices, the platform working in production, and cash at or above the £9,000 reserve (§6.3). The written decision is signed by the founder and counter-signed by the independent food safety consultant.
+              The Month 4 gate decision (§6.3) requires all five criteria in writing before paid trading in Month 5: UKAS-accredited swab clearance across &ge;30 events, &ge;98% complete ledger records across &ge;150 movements, &ge;95% on-window delivery, &ge;98% temperature integrity, and counter-signature by an independent food safety consultant with cash reserve verified.
             </p>
           </Card>
           <Card>

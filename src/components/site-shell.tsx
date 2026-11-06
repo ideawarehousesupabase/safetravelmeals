@@ -41,31 +41,31 @@ const navLinks = [
 // Sidebar sections for every page inside the app shell.
 const sidebarSections = [
   {
-    title: "Traveller",
+    title: "Traveller Journey",
     items: [
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { to: "/itinerary", label: "Itinerary", icon: Compass },
-      { to: "/scheduling", label: "Meal Plan", icon: Calendar },
-      { to: "/meals", label: "Meals", icon: Utensils },
-      { to: "/tracking", label: "Tracking", icon: MapPin },
+      { to: "/itinerary", label: "Itinerary Planner", icon: Compass },
+      { to: "/scheduling", label: "Exposure Meal Plan", icon: Calendar },
+      { to: "/meals", label: "Cook-Freeze Menu", icon: Utensils },
+      { to: "/tracking", label: "Kit Handover Tracking", icon: MapPin },
+      { to: "/dashboard", label: "Traveller Dashboard", icon: LayoutDashboard },
     ],
   },
   {
-    title: "JAAP protocol",
+    title: "JAAP Endorsement Audit",
     items: [
-      { to: "/protocol", label: "Workflow", icon: Workflow },
-      { to: "/rules", label: "Rule matrix", icon: ListChecks },
-      { to: "/records", label: "Meal-kit records", icon: FileText },
-      { to: "/validation", label: "Validation", icon: FlaskConical },
-      { to: "/exceptions", label: "Exceptions", icon: AlertTriangle },
+      { to: "/protocol", label: "1. Workflow Diagram", icon: Workflow },
+      { to: "/rules", label: "2. Rule Matrix", icon: ListChecks },
+      { to: "/records", label: "3. Sample Kit Records", icon: FileText },
+      { to: "/validation", label: "4. Test Results & Gate", icon: FlaskConical },
+      { to: "/exceptions", label: "5. Exception Handling", icon: AlertTriangle },
     ],
   },
   {
-    title: "Operations (demo)",
+    title: "Operations & Delivery",
     items: [
-      { to: "/kitchen", label: "Partner kitchen", icon: ChefHat },
-      { to: "/hotel", label: "Hotel front desk", icon: Hotel },
-      { to: "/admin", label: "Overview", icon: Gauge },
+      { to: "/kitchen", label: "Kitchen Run Sheet", icon: ChefHat },
+      { to: "/hotel", label: "Hotel Front Desk", icon: Hotel },
+      { to: "/admin", label: "Operations Overview", icon: Gauge },
     ],
   },
   {

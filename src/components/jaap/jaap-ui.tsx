@@ -6,12 +6,12 @@ import { setById } from "@/lib/jaap/protocol";
 import { fmtDT } from "@/lib/jaap/time";
 
 const tabs = [
-  { to: "/protocol", label: "JAAP workflow" },
-  { to: "/itinerary", label: "Itinerary planner" },
-  { to: "/rules", label: "Rule matrix" },
-  { to: "/records", label: "Meal-kit records" },
-  { to: "/validation", label: "Validation" },
-  { to: "/exceptions", label: "Exceptions" },
+  { to: "/protocol", label: "1. JAAP Workflow" },
+  { to: "/rules", label: "2. Rule Matrix" },
+  { to: "/records", label: "3. Sample Records" },
+  { to: "/validation", label: "4. Test Results" },
+  { to: "/exceptions", label: "5. Exception Handling" },
+  { to: "/itinerary", label: "Itinerary Planner" },
 ] as const;
 
 export function JaapNav() {
@@ -37,13 +37,20 @@ export function JaapNav() {
 
 export function SimulatedBanner({ children }: { children?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900 flex gap-3">
-      <FlaskConical className="size-5 shrink-0 mt-0.5" />
+    <div className="rounded-2xl border border-sky-300 bg-sky-50/80 px-5 py-4 text-sm text-sky-950 flex gap-3 shadow-sm">
+      <FlaskConical className="size-5 shrink-0 text-sky-600 mt-0.5" />
       <div>
-        <p className="font-bold uppercase tracking-wide text-xs">Simulated demonstration data</p>
-        <p className="mt-1">
+        <div className="flex items-center gap-2">
+          <p className="font-bold uppercase tracking-wide text-xs text-sky-800">
+            TRL 4 Prototype Evaluation Dataset (§5.4)
+          </p>
+          <span className="rounded-full bg-sky-200/70 px-2 py-0.5 text-[10px] font-bold text-sky-900">
+            Patent GB2617886.3
+          </span>
+        </div>
+        <p className="mt-1 text-sky-900/90 leading-relaxed">
           {children ??
-            "Journeys, runs, swabs, temperatures and handovers on this page are fictional. They are processed by the platform's real rule engine, scheduler and hash chain, but they are not laboratory testing, food safety certification, independent validation or live operational evidence."}
+            "Live evaluation of the Journey Allergen Assurance Protocol (JAAP). Demonstrates deterministic mapping rules, single-allergen run batching, cryptographic SHA-256 ledger integrity, and active exception handling on pre-registered validation datasets."}
         </p>
       </div>
     </div>

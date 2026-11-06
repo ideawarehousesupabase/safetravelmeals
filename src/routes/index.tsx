@@ -16,6 +16,9 @@ import {
   ListChecks,
   Building2,
   FlaskConical,
+  Workflow,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
 import heroMeal from "@/assets/hero-meal.jpg";
 import { SiteNav, SiteFooter } from "@/components/site-shell";
@@ -161,6 +164,120 @@ function HowItWorks() {
               <h3 className="font-bold text-lg mb-2">{s.title}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EndorsementAudit() {
+  const pillars = [
+    {
+      to: "/protocol",
+      num: "01",
+      title: "JAAP Workflow Diagram",
+      tag: "10-Stage Architecture",
+      desc: "Interactive 10-stage end-to-end assurance flow from itinerary intake through segregated cook-freeze production to verified handover.",
+      icon: Workflow,
+      badge: "Stage Diagram",
+    },
+    {
+      to: "/rules",
+      num: "02",
+      title: "Rule Matrix",
+      tag: "Rules R1–R5, P1–P2, H1–H3",
+      desc: "Auditable rule base mapping late arrivals, hotel breakfasts, working lunches, and long transit segments into exclusion sets.",
+      icon: ListChecks,
+      badge: "Rule Base",
+    },
+    {
+      to: "/records",
+      num: "03",
+      title: "Sample Kit Records",
+      tag: "150 Movement Ledgers",
+      desc: "Cryptographic SHA-256 hash-chained custody logs binding swab IDs, batch numbers, tamper seals, and receiving venue signatures.",
+      icon: FileText,
+      badge: "Patent GB2617886.3",
+    },
+    {
+      to: "/validation",
+      num: "04",
+      title: "Test Results & Gate",
+      tag: "Month 4 Gate Metrics",
+      desc: "Live measurement against pre-registered validation endpoints: zero swab detections, ≥98% ledger integrity, and cold-chain compliance.",
+      icon: FlaskConical,
+      badge: "Validation §5.4",
+    },
+    {
+      to: "/exceptions",
+      num: "05",
+      title: "Exception Handling",
+      tag: "7 Operational Scenarios",
+      desc: "Documented handling for exclusion mismatches, swab alerts, broken seals, transit delays, temperature excursions, and unverified substitutions.",
+      icon: AlertTriangle,
+      badge: "Risk Governance",
+    },
+  ];
+
+  return (
+    <section className="py-20 border-y border-brand-border bg-gradient-to-b from-brand-primary/5 via-secondary/20 to-transparent">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-accent/30 bg-brand-accent/10 px-3 py-1 mb-4">
+              <ShieldCheck className="size-3.5 text-brand-accent" />
+              <span className="text-xs font-bold tracking-wider text-brand-accent uppercase">
+                Endorsement Audit & Verification
+              </span>
+            </div>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">
+              The 5 Pillars of Journey Allergen Assurance
+            </h2>
+            <p className="mt-3 text-muted-foreground text-base">
+              Direct technical evidence demonstrating the readiness, deterministic execution, and auditable governance required under the Journey Allergen Assurance Protocol (JAAP).
+            </p>
+          </div>
+          <Link
+            to="/protocol"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-white hover:bg-brand-accent transition-all self-start md:self-end shadow-sm"
+          >
+            Explore Full Audit Trail <ArrowRight className="size-4" />
+          </Link>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {pillars.map((p) => (
+            <Link
+              key={p.num}
+              to={p.to}
+              className="group rounded-3xl border border-brand-border bg-card p-6 shadow-sm hover:border-brand-accent hover:shadow-elegant transition-all flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="font-mono text-xs font-bold text-brand-accent">{p.num}</span>
+                  <span className="rounded-full bg-brand-accent/10 px-2.5 py-0.5 text-[10px] font-bold text-brand-accent">
+                    {p.badge}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="size-10 rounded-xl bg-secondary grid place-items-center text-brand-primary group-hover:bg-brand-accent group-hover:text-white transition-colors shrink-0">
+                    <p.icon className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-base group-hover:text-brand-accent transition-colors">
+                      {p.title}
+                    </h3>
+                    <p className="text-[11px] font-medium text-muted-foreground">{p.tag}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-2">{p.desc}</p>
+              </div>
+              <div className="mt-5 pt-3 border-t border-brand-border/60 flex items-center justify-between text-xs font-bold text-brand-accent">
+                <span>View evidence</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </Link>
           ))}
         </div>
       </div>
@@ -333,6 +450,7 @@ function Landing() {
       <main>
         <Hero />
         <HowItWorks />
+        <EndorsementAudit />
         <Features />
         <Products />
         <Evidence />

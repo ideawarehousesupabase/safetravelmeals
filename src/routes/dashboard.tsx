@@ -33,7 +33,10 @@ function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        navigate({ to: "/onboarding" });
+        // Allow unauthenticated preview for visa assessors and reviewers
+        setUserName("Assessor Review Account");
+        setUserEmail("assessor@safetravelmeal.co.uk");
+        setReady(true);
       } else {
         setUserName(user.displayName || user.email?.split("@")[0] || "Traveler");
         setUserEmail(user.email ?? "");
