@@ -325,7 +325,7 @@ export function suggestProduct(accepted: ExposureWindow[], persons: number, hand
     const family = byId("family");
     return fits(family)
       ? { product: family, note: `${ke} kit-equivalents and ${handovers} handovers fit the family allowance.` }
-      : { product: null, note: "Exceeds the Family or Group Travel Kit allowance: coordinator quote." };
+      : { product: null, note: "Exceeds the Family or Group Travel Kit allowance: coordinator quote (GBP £)." };
   }
   if (ke === 1 && handovers === 1 && accepted[0].type === "late_arrival")
     return { product: byId("single"), note: "One verified meal on arrival." };
@@ -334,7 +334,7 @@ export function suggestProduct(accepted: ExposureWindow[], persons: number, hand
   if (fits(byId("solo"))) return { product: byId("solo"), note: `${ke} kit-equivalents and ${handovers} handovers fit the solo allowance.` };
   return {
     product: null,
-    note: "Exceeds a standard trip allowance: covered by a Frequent Traveller Subscription, a Corporate or Airline Pack, or a coordinator quote.",
+    note: "Exceeds a standard trip allowance: covered by a Frequent Traveller Subscription, a Corporate or Airline Pack, or a coordinator quote (GBP £).",
   };
 }
 

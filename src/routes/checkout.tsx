@@ -97,7 +97,7 @@ function Confirm({ ws, uid }: { ws: Workspace; uid: string }) {
         <div className="rounded-2xl border border-brand-border bg-card p-6 sticky top-24">
           <h3 className="font-display font-extrabold mb-5">Summary</h3>
           <div className="space-y-2 text-sm">
-            <Row k="Product" v={product?.name ?? "Coordinator quote"} />
+            <Row k="Product" v={product?.name ?? "Coordinator quote (GBP £)"} />
             <Row k="Kit-equivalents" v={product ? `${kits.length} of ${product.ke}` : String(kits.length)} />
             <Row k="Handovers" v={product ? `${plan.batches.length} of ${product.handovers}` : String(plan.batches.length)} />
             <div className="flex justify-between text-muted-foreground">
@@ -105,9 +105,9 @@ function Confirm({ ws, uid }: { ws: Workspace; uid: string }) {
               {plan.setId ? <SetBadge setId={plan.setId} /> : <span className="text-red-700 font-semibold">Refused</span>}
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-brand-border flex justify-between">
-            <span className="font-bold">Price</span>
-            <span className="font-display text-2xl font-extrabold">{product?.price ?? "Quote"}</span>
+          <div className="mt-4 pt-4 border-t border-brand-border flex justify-between items-baseline">
+            <span className="font-bold">Total Price (GBP £)</span>
+            <span className="font-display text-2xl font-extrabold text-brand-primary">{product?.price ?? "Custom Quote (GBP £)"}</span>
           </div>
           {j.status === "confirmed" ? (
             <div className="mt-5 rounded-full bg-brand-success/10 py-3 text-center text-sm font-bold text-brand-success flex items-center justify-center gap-2"><Check className="size-4" /> Plan confirmed</div>

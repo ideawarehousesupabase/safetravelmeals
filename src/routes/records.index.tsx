@@ -51,7 +51,7 @@ function JourneyCard({ ws, j, highlight, setFilter, statusFilter }: { ws: Worksp
         </div>
         <div className="text-right text-xs space-y-1">
           {plan.setId ? <SetBadge setId={plan.setId} long /> : <span className="font-semibold text-red-700">Refused: {plan.setReason}</span>}
-          <p className="font-semibold">{product ? `${product.name} · ${product.price}` : "Coordinator quote"}</p>
+          <p className="font-semibold">{product ? `${product.name} · ${product.price}` : "Coordinator quote (GBP £)"}</p>
           <p className="text-muted-foreground">
             {plan.windows.length} windows, {plan.windows.filter((w) => w.accepted).length} accepted · {plan.kits.length} kits · {plan.batches.length} handovers
           </p>

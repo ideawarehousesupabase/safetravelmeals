@@ -415,8 +415,8 @@ function Planner({ ws, uid }: { ws: Workspace; uid: string }) {
                 <p className="text-[10px] text-muted-foreground">handovers</p>
               </div>
               <div className="rounded-xl bg-secondary p-3">
-                <p className="font-display text-sm font-extrabold leading-tight mt-1">{product?.price ?? "Quote"}</p>
-                <p className="text-[10px] text-muted-foreground mt-1">price</p>
+                <p className="font-display text-sm font-extrabold leading-tight mt-1">{product?.price ?? "Custom Quote (GBP £)"}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Price (GBP £)</p>
               </div>
             </div>
             <p className="mt-3 text-sm font-semibold">{product?.name ?? "No standard product"}</p>

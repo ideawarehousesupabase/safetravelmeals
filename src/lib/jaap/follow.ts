@@ -84,7 +84,7 @@ export function kitStages(ws: Workspace, kit: KitView): StageView[] {
     4: [
       ["Kit", `${kit.kitId} · ${WINDOW_TYPES[kit.type].kit}${j.persons > 1 ? ` · person ${kit.person} of ${j.persons}` : ""}`],
       ["Dish", kit.dish],
-      ["Product", product ? `${product.name} (${product.price})` : "Coordinator quote"],
+      ["Product", product ? `${product.name} (${product.price})` : "Coordinator quote (GBP £)"],
       ["Handover", `${b.place}, ${fmtRange(b.start, b.end)}`],
     ],
     5: [

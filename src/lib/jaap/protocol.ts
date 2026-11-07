@@ -57,12 +57,12 @@ export type Product = { id: ProductId; name: string; what: string; price: string
 
 // §4.6, Table 8
 export const PRODUCTS: Product[] = [
-  { id: "single", name: "Single Arrival Kit", what: "One verified meal on arrival", price: "£25", ke: 1, handovers: 1 },
-  { id: "daily", name: "Daily Safety Pack", what: "Breakfast plus one further occasion for one day", price: "£45", ke: 2, handovers: 1 },
-  { id: "solo", name: "Solo Traveller Meal Kit", what: "A mapped short trip for one traveller", price: "£120", ke: 5, handovers: 2 },
-  { id: "family", name: "Family or Group Travel Kit", what: "A mapped trip for a family or group booking", price: "£350", ke: 14, handovers: 3 },
-  { id: "subscription", name: "Frequent Traveller Subscription", what: "Monthly cover for a regular traveller", price: "£220 a month", ke: 8, handovers: 2 },
-  { id: "corporate", name: "Corporate or Airline Pack", what: "A block for an employer or operator", price: "£600", ke: 24, handovers: 6 },
+  { id: "single", name: "Single Arrival Kit", what: "One verified meal on arrival", price: "£25 GBP", ke: 1, handovers: 1 },
+  { id: "daily", name: "Daily Safety Pack", what: "Breakfast plus one further occasion for one day", price: "£45 GBP", ke: 2, handovers: 1 },
+  { id: "solo", name: "Solo Traveller Meal Kit", what: "A mapped short trip for one traveller", price: "£120 GBP", ke: 5, handovers: 2 },
+  { id: "family", name: "Family or Group Travel Kit", what: "A mapped trip for a family or group booking", price: "£350 GBP", ke: 14, handovers: 3 },
+  { id: "subscription", name: "Frequent Traveller Subscription", what: "Monthly cover for a regular traveller", price: "£220 GBP / month", ke: 8, handovers: 2 },
+  { id: "corporate", name: "Corporate or Airline Pack", what: "A block for an employer or operator", price: "£600 GBP", ke: 24, handovers: 6 },
 ];
 export const productById = (id: ProductId) => PRODUCTS.find((p) => p.id === id)!;
 

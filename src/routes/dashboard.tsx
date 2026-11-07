@@ -348,7 +348,7 @@ function MealPackagesCard() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display font-extrabold text-lg">Your kits</h3>
-          <p className="text-xs text-muted-foreground">{journey.productInfo ? `${journey.productInfo.name} · ${journey.productInfo.price}` : "Coordinator quote"}</p>
+          <p className="text-xs text-muted-foreground">{journey.productInfo ? `${journey.productInfo.name} · ${journey.productInfo.price}` : "Coordinator quote (GBP £)"}</p>
         </div>
         <Link to="/records" search={{ journey: journey.id }} className="text-xs font-bold text-brand-accent">All records →</Link>
       </div>

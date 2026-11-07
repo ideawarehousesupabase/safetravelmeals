@@ -353,7 +353,7 @@ function Products() {
           <div>
             <p className="text-xs font-bold text-brand-accent uppercase tracking-[0.2em] mb-3">Products</p>
             <h2 className="font-display text-4xl font-extrabold tracking-tight">Six products, one protocol</h2>
-            <p className="text-muted-foreground mt-2">Every kit is produced under the same regime. Prices as set out in the business plan.</p>
+            <p className="text-muted-foreground mt-2">Every kit is produced under the same regime. All pricing in British Pounds (GBP £) as set out in the business plan.</p>
           </div>
           <Link to="/meals" className="text-sm font-bold text-brand-accent flex items-center gap-1 hover:gap-2 transition-all">
             See the travel menu <ArrowRight className="size-4" />

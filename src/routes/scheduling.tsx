@@ -130,8 +130,8 @@ function Plan({ ws }: { ws: Workspace }) {
             </ul>
           </div>
           <Link to="/checkout" search={{ journey: j.id }} className="block rounded-2xl bg-brand-accent text-white p-6 hover:scale-[1.02] transition-transform shadow-glow">
-            <p className="text-xs font-bold uppercase tracking-widest text-white/70">{product?.name ?? "Coordinator quote"}</p>
-            <p className="font-display text-3xl font-extrabold mt-1">{product?.price ?? "—"}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/70">{product?.name ?? "Coordinator quote (GBP £)"}</p>
+            <p className="font-display text-3xl font-extrabold mt-1">{product?.price ?? "Quote on request (GBP £)"}</p>
             <p className="mt-3 text-sm font-bold flex items-center gap-1">{j.status === "confirmed" ? "Plan confirmed" : "Review and confirm"} <ArrowRight className="size-4" /></p>
           </Link>
         </aside>
