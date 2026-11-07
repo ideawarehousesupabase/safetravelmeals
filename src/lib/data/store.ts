@@ -4,7 +4,6 @@ import { collection, doc, writeBatch, type DocumentReference } from "firebase/fi
 import { db } from "../firebase";
 import { processInput, type ClearanceInput, type EventInput, type JourneyInput, type StaffInput, type TravellerInput, type Workspace } from "../processing";
 import { nowLondon } from "../jaap/time";
-import { buildSampleData } from "./sample";
 
 export const COLLECTIONS = ["travellers", "journeys", "plans", "staff", "clearances", "events"] as const;
 export type CollectionName = (typeof COLLECTIONS)[number];
@@ -117,37 +116,15 @@ export async function importRecords(
   await commit(ops);
 }
 
-export async function loadSampleData(uid: string) {
-  const s = buildSampleData(nowLondon().slice(0, 10));
+export async function deleteAllMyData(uid: string, ws: Workspace) {
+  const del = (name: CollectionName, id: string): Op => ({ kind: "delete", ref: ref(uid, name, id) });
   const ops: Op[] = [
-    ...s.travellers.map((x): Op => ({ kind: "set", ref: ref(uid, "travellers", x.id), data: x })),
-    ...s.journeys.map((x): Op => ({ kind: "set", ref: ref(uid, "journeys", x.id), data: x })),
-    ...s.plans.map((x): Op => ({ kind: "set", ref: ref(uid, "plans", x.journeyId), data: x })),
-    ...s.staff.map((x): Op => ({ kind: "set", ref: ref(uid, "staff", x.id), data: x })),
-    ...s.clearances.map((x): Op => ({ kind: "set", ref: ref(uid, "clearances", x.runId), data: x })),
-    ...s.events.map((x): Op => ({ kind: "set", ref: ref(uid, "events", x.id), data: x })),
+    ...ws.travellers.map((x) => del("travellers", x.id)),
+    ...ws.journeys.map((x) => del("journeys", x.id)),
+    ...ws.plans.map((p) => del("plans", p.journeyId)),
+    ...ws.staff.map((x) => del("staff", x.id)),
+    ...ws.clearances.map((x) => del("clearances", x.runId)),
+    ...ws.events.map((x) => del("events", x.id)),
   ];
   await commit(ops);
-}
-
-export async function deleteSampleData(uid: string, ws: Workspace) {
-  await commit(dataDeleteOps(uid, ws, (x) => x.source === "sample"));
-}
-
-export async function deleteAllMyData(uid: string, ws: Workspace) {
-  await commit(dataDeleteOps(uid, ws, () => true));
-}
-
-function dataDeleteOps(uid: string, ws: Workspace, keep: (x: { source: string }) => boolean): Op[] {
-  const del = (name: CollectionName, id: string): Op => ({ kind: "delete", ref: ref(uid, name, id) });
-  const journeys = ws.journeys.filter(keep);
-  const journeyIds = new Set(journeys.map((j) => j.id));
-  return [
-    ...ws.travellers.filter(keep).map((x) => del("travellers", x.id)),
-    ...journeys.map((x) => del("journeys", x.id)),
-    ...ws.plans.filter((p) => journeyIds.has(p.journeyId) || !ws.journeys.some((j) => j.id === p.journeyId)).map((p) => del("plans", p.journeyId)),
-    ...ws.staff.filter(keep).map((x) => del("staff", x.id)),
-    ...ws.clearances.filter(keep).map((x) => del("clearances", x.runId)),
-    ...ws.events.filter((e) => keep(e) || journeyIds.has(e.journeyId)).map((x) => del("events", x.id)),
-  ];
 }

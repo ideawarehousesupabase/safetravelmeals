@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, KitStatusPill, LedgerTable, OutcomePill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, KitStatusPill, LedgerTable, OutcomePill, SetBadge } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { AlertTriangle, ArrowDown, ArrowLeft, Check, Download, ShieldCheck, ShieldX, X } from "lucide-react";
 import { verifyChain, type KitView, type LedgerEntry, type Workspace } from "@/lib/processing";
@@ -91,8 +91,6 @@ function KitRecord({ ws, kit }: { ws: Workspace; kit: KitView }) {
       <JaapNav />
 
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        {kit.source === "sample" && <SampleBanner />}
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             ["Exclusion set", <SetBadge key="s" setId={kit.setId} long />],

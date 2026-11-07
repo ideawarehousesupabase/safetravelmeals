@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, CapabilityNote, JaapNav, OutcomePill, Pill, SampleBanner } from "@/components/jaap/jaap-ui";
+import { Card, CapabilityNote, JaapNav, OutcomePill, Pill } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { ChevronDown, FlaskConical, Gauge } from "lucide-react";
 import { evaluateClearance, staffName, type Workspace } from "@/lib/processing";
@@ -73,8 +73,6 @@ function Dashboard({ ws }: { ws: Workspace }) {
 
   return (
       <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-        {ws.hasSample && <SampleBanner />}
-
         <div className="grid lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <div className="flex items-center gap-2">

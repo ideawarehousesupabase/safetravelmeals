@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, LedgerTable, OutcomePill, Pill, SampleBanner, SampleTag } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, LedgerTable, OutcomePill, Pill } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { CheckCircle2, Circle, ShieldCheck } from "lucide-react";
 import { verifyChain, type ExceptionView, type Workspace } from "@/lib/processing";
@@ -87,7 +87,6 @@ function ExceptionCard({ e, ws, uid }: { e: ExceptionView; ws: Workspace; uid: s
             <h3 className="font-display text-lg font-extrabold">{e.title}</h3>
           </div>
           <div className="flex items-center gap-2">
-            {journey?.source === "sample" && <SampleTag />}
             <OutcomePill outcome={e.outcome} />
           </div>
         </div>
@@ -154,7 +153,6 @@ function Exceptions({ ws, uid }: { ws: Workspace; uid: string }) {
   const clean = ws.kits.find((k) => !k.exceptionIds.length && k.status === "Receipt confirmed");
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="flex flex-wrap items-center gap-2">
         {FILTERS.map((f) => (
           <button key={f} onClick={() => setFilter(f)} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${filter === f ? "border-brand-accent bg-brand-accent/10 text-brand-accent" : "border-brand-border"}`}>

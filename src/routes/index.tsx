@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({
 });
 
 // An illustrative itinerary run through the real rule engine for the hero card.
-const EXAMPLE_TRAVELLER: TravellerInput = { id: "example", label: "Example traveller", allergens: ["peanut", "sesame"], severity: "Severe", preference: "South Asian", consentVersion: "1.2", consentAt: "2026-01-01T00:00", source: "sample" };
+const EXAMPLE_TRAVELLER: TravellerInput = { id: "example", label: "Example traveller", allergens: ["peanut", "sesame"], severity: "Severe", preference: "South Asian", consentVersion: "1.2", consentAt: "2026-01-01T00:00", source: "user" };
 const EXAMPLE_JOURNEY: JourneyInput = {
   id: "example",
   travellerId: "example",
@@ -52,7 +52,7 @@ const EXAMPLE_JOURNEY: JourneyInput = {
   accountProduct: null,
   status: "draft",
   createdAt: "2026-01-01T00:00",
-  source: "sample",
+  source: "user",
   legs: [
     { id: "f1", kind: "flight", ref: "FL 1463", from: "EDI", to: "LHR", depart: "2026-03-04T20:15", arrive: "2026-03-04T21:40", departsFromServiceArea: false },
     { id: "h1", kind: "hotel", name: "Riverside Hotel, Greenwich", location: "Greenwich, London SE10", checkIn: "2026-03-04T22:50", checkOut: "2026-03-07T09:30" },
@@ -60,11 +60,11 @@ const EXAMPLE_JOURNEY: JourneyInput = {
   ],
 };
 const EXAMPLE_PLAN = processInput(EXAMPLE_JOURNEY, EXAMPLE_TRAVELLER, "example");
-const SAMPLE = { windows: EXAMPLE_PLAN.windows, preference: EXAMPLE_TRAVELLER.preference, set: EXAMPLE_PLAN.setId ? setById(EXAMPLE_PLAN.setId) : null };
+const DEMO_PREVIEW = { windows: EXAMPLE_PLAN.windows, preference: EXAMPLE_TRAVELLER.preference, set: EXAMPLE_PLAN.setId ? setById(EXAMPLE_PLAN.setId) : null };
 const WINDOW_ICON = { late_arrival: Hotel, breakfast: Hotel, lunch: Briefcase, in_transit: Plane };
 
 function Hero() {
-  const shown = SAMPLE.windows.filter((w) => w.accepted).slice(0, 3);
+  const shown = DEMO_PREVIEW.windows.filter((w) => w.accepted).slice(0, 3);
   return (
     <header className="relative overflow-hidden pt-16 pb-24">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_50%_0%,oklch(0.95_0.04_237/0.6),transparent)]" />
@@ -124,7 +124,7 @@ function Hero() {
                       <div>
                         <p className="text-[11px] font-bold text-brand-accent">{fmtDT(w.occasionStart)} · {w.place}</p>
                         <p className="font-bold text-sm mt-0.5">{w.ruleId} · {WINDOW_TYPES[w.type].label}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{DISHES[SAMPLE.preference][w.type]}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{DISHES[DEMO_PREVIEW.preference][w.type]}</p>
                       </div>
                       <div className="size-9 rounded-lg bg-secondary border border-brand-border grid place-items-center shrink-0">
                         <Icon className="size-4 text-muted-foreground" />
@@ -138,12 +138,12 @@ function Hero() {
             <div className="mt-6 rounded-2xl bg-brand-primary p-4 text-primary-foreground">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[10px] font-bold tracking-[0.2em] text-white/60 uppercase">Allergen profile</span>
-                <span className="text-[10px] font-bold text-brand-accent">{SAMPLE.set!.code} production run</span>
+                <span className="text-[10px] font-bold text-brand-accent">{DEMO_PREVIEW.set!.code} production run</span>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <span className="px-2 py-1 rounded bg-red-500/20 text-red-300 text-[10px] font-bold border border-red-500/30">Peanut</span>
                 <span className="px-2 py-1 rounded bg-red-500/20 text-red-300 text-[10px] font-bold border border-red-500/30">Sesame</span>
-                <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">{SAMPLE.preference} menu</span>
+                <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">{DEMO_PREVIEW.preference} menu</span>
               </div>
             </div>
           </div>
@@ -214,7 +214,7 @@ function EndorsementAudit() {
     {
       to: "/records",
       num: "03",
-      title: "Sample Kit Records",
+      title: "Kit Records",
       tag: "150 Movement Ledgers",
       desc: "Cryptographic SHA-256 hash-chained custody logs binding swab IDs, batch numbers, tamper seals, and receiving venue signatures.",
       icon: FileText,
@@ -455,7 +455,7 @@ function CTA() {
                 <Sparkles className="size-4" /> Open your records
               </Link>
             </div>
-            <p className="mt-6 text-xs text-white/50">Sign in to keep your journeys; sample data is available if you want to explore first.</p>
+            <p className="mt-6 text-xs text-white/50">Sign in to manage your journeys and meal kit custody records.</p>
           </div>
         </div>
       </div>

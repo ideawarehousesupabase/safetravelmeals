@@ -673,7 +673,6 @@ export function processWorkspace(snap: WorkspaceSnapshot, now: Naive = nowLondon
     endpoints,
     clearanceControl,
     isEmpty: snap.travellers.length === 0 && snap.journeys.length === 0,
-    hasSample: [...snap.travellers, ...snap.journeys].some((x) => x.source === "sample"),
   };
 }
 

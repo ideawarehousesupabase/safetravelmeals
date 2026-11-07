@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { JaapNav, KitStatusPill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { JaapNav, KitStatusPill, SetBadge } from "@/components/jaap/jaap-ui";
 import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { Hotel, Clock, Package, Refrigerator } from "lucide-react";
 import type { Workspace } from "@/lib/processing";
@@ -46,7 +46,6 @@ function Desk({ ws, uid }: { ws: Workspace; uid: string }) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <select value={hotel} onChange={(e) => { setHotel(e.target.value); setDay("all"); }} className="rounded-lg border border-brand-border bg-background px-3 py-2 text-sm max-w-full">
           {hotels.map((h) => <option key={h}>{h}</option>)}

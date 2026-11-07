@@ -1,7 +1,7 @@
 // Optional sample data. It is written into the user's own account as ordinary primary input
 // (travellers, itineraries, staff, clearances, events); the engine derives everything else.
 // Dates are shifted so the journeys sit in the two weeks before the day it is loaded.
-import { deriveWorkspace, processInput } from "../processing";
+import { deriveWorkspace, processInput } from "../src/lib/processing";
 import type {
   ClearanceInput,
   EventInput,
@@ -10,10 +10,10 @@ import type {
   StaffInput,
   TravellerInput,
   WorkspaceSnapshot,
-} from "../processing";
-import type { Leg } from "../jaap/engine";
-import { sha256 } from "../jaap/sha256";
-import { addDays, addMin, at, dateOf, dayOfWeek, diffMin, toMin, type Naive } from "../jaap/time";
+} from "../src/lib/processing";
+import type { Leg } from "../src/lib/jaap/engine";
+import { sha256 } from "../src/lib/jaap/sha256";
+import { addDays, addMin, at, dateOf, dayOfWeek, diffMin, toMin, type Naive } from "../src/lib/jaap/time";
 
 const BASE_WED = "2027-04-21"; // the Wednesday the sample journeys were written around
 

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { FlaskConical, Info, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
+import { Info, ShieldAlert, ShieldCheck, ShieldX } from "lucide-react";
 import type { ReactNode } from "react";
 import type { LedgerEntry } from "@/lib/processing";
 import { setById } from "@/lib/jaap/protocol";
@@ -8,7 +8,7 @@ import { fmtDT } from "@/lib/jaap/time";
 const tabs = [
   { to: "/protocol", label: "1. JAAP Workflow" },
   { to: "/rules", label: "2. Rule Matrix" },
-  { to: "/records", label: "3. Sample Records" },
+  { to: "/records", label: "3. Kit Records" },
   { to: "/validation", label: "4. Test Results" },
   { to: "/exceptions", label: "5. Exception Handling" },
   { to: "/itinerary", label: "Itinerary Planner" },
@@ -34,47 +34,6 @@ export function JaapNav() {
       </div>
     </div>
   );
-}
-
-export function SampleBanner({ children }: { children?: ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-sky-300 bg-sky-50/80 px-5 py-3 text-sm text-sky-950 flex gap-3 shadow-sm">
-      <FlaskConical className="size-5 shrink-0 text-sky-600 mt-0.5" />
-      <div>
-        {children ?? (
-          <p>
-            Some records in your account are <strong>pre-registered validation data (§5.4)</strong>. They are processed through the deterministic rule engine exactly like your own input; manage them from the Import page.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export function SimulatedBanner({ children }: { children?: ReactNode }) {
-  return (
-    <div className="rounded-2xl border border-sky-300 bg-sky-50/80 px-5 py-4 text-sm text-sky-950 flex gap-3 shadow-sm">
-      <FlaskConical className="size-5 shrink-0 text-sky-600 mt-0.5" />
-      <div>
-        <div className="flex items-center gap-2">
-          <p className="font-bold uppercase tracking-wide text-xs text-sky-800">
-            TRL 4 Prototype Evaluation Dataset (§5.4)
-          </p>
-          <span className="rounded-full bg-sky-200/70 px-2 py-0.5 text-[10px] font-bold text-sky-900">
-            Patent GB2617886.3
-          </span>
-        </div>
-        <p className="mt-1 text-sky-900/90 leading-relaxed">
-          {children ??
-            "Live evaluation of the Journey Allergen Assurance Protocol (JAAP). Demonstrates deterministic mapping rules, single-allergen run batching, cryptographic SHA-256 ledger integrity, and active exception handling on pre-registered validation datasets."}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export function SampleTag() {
-  return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">Sample</span>;
 }
 
 export function CapabilityNote({ children }: { children: ReactNode }) {

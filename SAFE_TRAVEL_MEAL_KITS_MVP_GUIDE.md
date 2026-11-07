@@ -97,3 +97,4 @@ $$\text{User / CSV Input} \longrightarrow \text{Cloud Firestore } (\texttt{users
 | **Family / Group Travel Kit** | Mapped trip for families with allergic children | 14 | 2 | **£350** |
 | **Frequent Traveller Subscription** | Monthly cover for regular business travel | 8 | 2 | **£220/mo** |
 | **Corporate / Airline Pack** | Employer block booking for staff duty of care | 24 | 3 | **£600** |
+

@@ -1,5 +1,5 @@
 // Engine checks: run with `npm run check:engine`. Exits non-zero on the first failure.
-import { buildSampleData } from "../src/lib/data/sample";
+import { buildSampleData } from "./fixtures";
 import { deriveWorkspace, processInput, verifyChain, type EventInput, type JourneyInput, type TravellerInput } from "../src/lib/processing";
 
 let failures = 0;

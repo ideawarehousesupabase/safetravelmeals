@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { JaapNav, OutcomePill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { JaapNav, OutcomePill, SetBadge } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { Users, Utensils, Truck, ChefHat, ShieldCheck } from "lucide-react";
 import type { Workspace } from "@/lib/processing";
@@ -43,7 +43,6 @@ function Overview({ ws }: { ws: Workspace }) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
           <div key={k.label} className="rounded-2xl border border-brand-border bg-card p-5">

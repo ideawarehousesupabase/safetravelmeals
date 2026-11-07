@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, Pill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, Pill, SetBadge } from "@/components/jaap/jaap-ui";
 import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { ChefHat, Package, ShieldCheck, Check, AlertTriangle, Clock, Plus, UserCheck } from "lucide-react";
 import { KITCHEN, evaluateClearance, staffName, type Run, type StaffInput, type Workspace } from "@/lib/processing";
@@ -48,7 +48,6 @@ function RunSheet({ ws, uid }: { ws: Workspace; uid: string }) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       {dates.length === 0 ? (
         <EmptyState uid={uid} title="No production runs yet" text="Runs appear once a saved journey has kits. Check that each traveller's allergens are covered by a published exclusion set." />
       ) : (

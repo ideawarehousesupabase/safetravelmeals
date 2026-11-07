@@ -7,9 +7,9 @@ import { EVENT_TYPES, type EventInput, type EventType, type JourneyInput, type T
 import { newId } from "./store";
 
 export const JOURNEYS_TEMPLATE = `journey_ref,traveller,allergens,severity,preference,persons,leg_type,name,location,from,to,start,end,catered,departs_from_uk
-trip-1,Alex Morgan,peanut;sesame,Severe,South Asian,1,flight,FL 1463,,EDI,LHR,2026-12-02 20:15,2026-12-02 21:40,,no
-trip-1,Alex Morgan,peanut;sesame,Severe,South Asian,1,hotel,Riverside Hotel,"Greenwich, London SE10",,,2026-12-02 22:50,2026-12-04 09:30,,
-trip-1,Alex Morgan,peanut;sesame,Severe,South Asian,1,meeting,Client workshop,"Canary Wharf, London E14",,,2026-12-03 11:30,2026-12-03 15:00,no,
+London Executive Summit,Alex Morgan,peanut;sesame,Severe,South Asian,1,flight,FL 1463,,EDI,LHR,2026-12-02 20:15,2026-12-02 21:40,,no
+London Executive Summit,Alex Morgan,peanut;sesame,Severe,South Asian,1,hotel,Riverside Hotel,"Greenwich, London SE10",,,2026-12-02 22:50,2026-12-04 09:30,,
+London Executive Summit,Alex Morgan,peanut;sesame,Severe,South Asian,1,meeting,Client workshop,"Canary Wharf, London E14",,,2026-12-03 11:30,2026-12-03 15:00,no,
 `;
 
 export const EVENTS_TEMPLATE = `kit_id,event,time,recorded_time,temp_c,seal,released_to,resolves,actor,note

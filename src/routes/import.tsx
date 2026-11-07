@@ -3,10 +3,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
 import { Card, JaapNav } from "@/components/jaap/jaap-ui";
-import { ConfirmButton, LoadSampleButton, WorkspaceGate } from "@/components/workspace-gate";
+import { ConfirmButton, WorkspaceGate } from "@/components/workspace-gate";
 import { Download, FileUp, Loader2, Upload } from "lucide-react";
 import { EVENTS_TEMPLATE, JOURNEYS_TEMPLATE, validateEventsCsv, validateJourneysCsv, type EventImport, type JourneyImport } from "@/lib/data/csv";
-import { deleteAllMyData, deleteSampleData, importRecords } from "@/lib/data/store";
+import { deleteAllMyData, importRecords } from "@/lib/data/store";
 import type { Workspace } from "@/lib/processing";
 
 export const Route = createFileRoute("/import")({
@@ -168,20 +168,7 @@ function Importers({ ws, uid }: { ws: Workspace; uid: string }) {
         />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <Card>
-          <h2 className="font-display text-lg font-extrabold">Sample data</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Adds five sample journeys, three kitchen staff, clearance records and handover events that exercise all seven exception types. They are stored in your account and processed like your own data.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {ws.hasSample ? (
-              <ConfirmButton label="Remove sample data" confirmLabel="Remove all sample records" onConfirm={() => deleteSampleData(uid, ws)} />
-            ) : (
-              <LoadSampleButton uid={uid} />
-            )}
-          </div>
-        </Card>
+      <div>
         <Card className="border-red-200">
           <h2 className="font-display text-lg font-extrabold text-red-800">Delete all my data</h2>
           <p className="text-sm text-muted-foreground mt-1">Removes every traveller, journey, plan, staff record, clearance and event in your account. Your login stays.</p>

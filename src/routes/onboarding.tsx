@@ -119,24 +119,6 @@ function OnboardingPage() {
             {loading ? <Loader2 className="size-4 animate-spin" /> : <>{mode === "signup" ? "Create account" : "Log in"} <ArrowRight className="size-4" /></>}
           </button>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-brand-border" /></div>
-            <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Or</span></div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              try {
-                localStorage.setItem("safemeal.assessorPreview", "1");
-              } catch {}
-              navigate({ to: "/dashboard" });
-            }}
-            className="w-full rounded-full border-2 border-brand-accent/40 bg-brand-accent/5 px-5 py-3 text-sm font-bold text-brand-primary flex items-center justify-center gap-2 hover:bg-brand-accent hover:text-white transition-all shadow-sm"
-          >
-            <ShieldCheck className="size-4 text-brand-accent" /> Explore Demo as Assessor (Instant Access)
-          </button>
-
           <p className="text-xs text-muted-foreground mt-6 text-center">
             {mode === "signup" ? "Already have an account?" : "New to SafeMeal?"}{" "}
             <button

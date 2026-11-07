@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, KitStatusPill, OutcomePill, SampleBanner, SampleTag, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, KitStatusPill, OutcomePill, SetBadge } from "@/components/jaap/jaap-ui";
 import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { ALLERGENS, EXCLUSION_SETS, WINDOW_TYPES, productById } from "@/lib/jaap/protocol";
 import { fmtDT, fmtRange } from "@/lib/jaap/time";
@@ -45,7 +45,7 @@ function JourneyCard({ ws, j, highlight, setFilter, statusFilter }: { ws: Worksp
     <Card className={highlight ? "ring-2 ring-brand-accent" : ""}>
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
-          <p className="text-xs font-bold text-brand-accent flex items-center gap-2">{t?.label} {j.source === "sample" && <SampleTag />}</p>
+          <p className="text-xs font-bold text-brand-accent">{t?.label}</p>
           <h3 className="font-display text-lg font-extrabold">{j.label}</h3>
           <p className="text-sm text-muted-foreground">Allergens: {t?.allergens.map((a) => ALLERGENS[a]).join(", ")} · status {j.status}</p>
         </div>
@@ -115,7 +115,6 @@ function Records({ ws, uid }: { ws: Workspace; uid: string }) {
   const [statusFilter, setStatusFilter] = useState("All");
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
           {ws.journeys.length} journeys · {ws.kits.length} kits · {ws.runs.length} production runs

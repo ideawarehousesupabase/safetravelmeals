@@ -248,5 +248,4 @@ export type Workspace = WorkspaceSnapshot & {
   endpoints: EndpointResult[];
   clearanceControl: { events: number; attempts: number; rejected: number; firstTime: number };
   isEmpty: boolean;
-  hasSample: boolean;
 };

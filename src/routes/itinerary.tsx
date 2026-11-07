@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, Pill, SampleTag, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, Pill, SetBadge } from "@/components/jaap/jaap-ui";
 import { ConfirmButton, WorkspaceGate } from "@/components/workspace-gate";
 import { Plane, Hotel, Briefcase, Plus, MapPin, Clock, ArrowRight, Trash2, ShieldX, ListChecks, Package, Save, Loader2 } from "lucide-react";
 import { legLabel, type Leg } from "@/lib/jaap/engine";
@@ -190,7 +190,6 @@ function Planner({ ws, uid }: { ws: Workspace; uid: string }) {
                 ))}
                 <option value="new">+ New traveller</option>
               </select>
-              {storedT?.source === "sample" && <SampleTag />}
             </div>
             <p className="text-xs text-muted-foreground mt-1">Diagnosed allergens only. Health data is held under explicit consent; records refer to the traveller by an internal id (§13.5).</p>
             <div className="mt-4 grid sm:grid-cols-3 gap-3">

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, KitStatusPill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, JaapNav, KitStatusPill, SetBadge } from "@/components/jaap/jaap-ui";
 import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { ShieldCheck, QrCode, Check, ChefHat, Truck, ShieldX, Briefcase, Hotel, ClipboardCheck } from "lucide-react";
 import { useState } from "react";
@@ -62,7 +62,6 @@ function Tracker({ ws, uid }: { ws: Workspace; uid: string }) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Kit</label>
         <select value={kit.kitId} onChange={(e) => navigate({ to: "/tracking", search: { kit: e.target.value }, replace: true })} className="rounded-lg border border-brand-border bg-background px-3 py-2 text-sm max-w-full">

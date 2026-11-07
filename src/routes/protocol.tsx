@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { CapabilityNote, Card, JaapNav, SampleTag, SetBadge } from "@/components/jaap/jaap-ui";
+import { CapabilityNote, Card, JaapNav, SetBadge } from "@/components/jaap/jaap-ui";
 import { EmptyState, WorkspaceGate } from "@/components/workspace-gate";
 import { AlertTriangle, ArrowDown, ArrowRight, Check, CornerDownLeft, FileText, RotateCcw, X } from "lucide-react";
 import { STAGES } from "@/lib/jaap/stages";
@@ -117,7 +117,6 @@ function Flow({ ws }: { ws: Workspace }) {
               ))}
             </select>
             <SetBadge setId={kit.setId} long />
-            {kit.source === "sample" && <SampleTag />}
             <Link to="/records/$kitId" params={{ kitId: kit.kitId }} className="ml-auto text-sm font-bold text-brand-accent flex items-center gap-1">
               Open full record <ArrowRight className="size-4" />
             </Link>

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { JaapNav, KitStatusPill, Pill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { JaapNav, KitStatusPill, Pill, SetBadge } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import { Plane, Hotel, Briefcase, ArrowRight, ListChecks, FileText } from "lucide-react";
 import type { Workspace } from "@/lib/processing";
@@ -46,7 +46,6 @@ function Plan({ ws }: { ws: Workspace }) {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-6">
-      {ws.hasSample && <SampleBanner />}
       <div className="flex flex-wrap items-center gap-3">
         <select value={j.id} onChange={(e) => navigate({ to: "/scheduling", search: { journey: e.target.value }, replace: true })} className="rounded-lg border border-brand-border bg-background px-3 py-2 text-sm max-w-full">
           {ws.journeys.map((x) => (

@@ -5,7 +5,7 @@ import {
   MessageSquare, Settings, LogOut, Search, Bell, ChevronLeft, ChevronRight,
   TrendingUp, ShieldCheck, MapPin, Sparkles, Plus, Compass, Bookmark, Image as ImgIcon,
 } from "lucide-react";
-import { KitStatusPill, SampleBanner, SetBadge } from "@/components/jaap/jaap-ui";
+import { KitStatusPill, SetBadge } from "@/components/jaap/jaap-ui";
 import { WorkspaceGate } from "@/components/workspace-gate";
 import type { KitView, PlanWindow, Workspace } from "@/lib/processing";
 import type { Leg, HandoverBatch } from "@/lib/jaap/engine";
@@ -94,7 +94,7 @@ function TopBar({ name }: { name: string }) {
   );
 }
 
-/* ------------- Sample journey ------------- */
+/* ------------- Selected journey context ------------- */
 
 type DashJourney = {
   id: string;
@@ -109,7 +109,7 @@ type DashJourney = {
   productInfo: Product | null;
   legs: Leg[];
 };
-const DashCtx = createContext<{ SAMPLE: DashJourney; SAMPLE_KITS: KitView[] } | null>(null);
+const DashCtx = createContext<{ journey: DashJourney; kits: KitView[] } | null>(null);
 const useDash = () => useContext(DashCtx)!;
 const allergenList = (xs: Allergen[]) => xs.map((a) => ALLERGENS[a]).join(", ");
 
@@ -119,7 +119,7 @@ function DashboardBody({ ws }: { ws: Workspace }) {
   const j = ws.journeys.find((x) => x.id === jid) ?? ws.journeys[0];
   const t = ws.travellers.find((x) => x.id === j.travellerId);
   const plan = ws.plansById[j.id];
-  const SAMPLE: DashJourney = {
+  const journey: DashJourney = {
     id: j.id,
     label: j.label,
     windows: plan.windows,
@@ -132,10 +132,9 @@ function DashboardBody({ ws }: { ws: Workspace }) {
     productInfo: plan.productId ? productById(plan.productId) : null,
     legs: j.legs,
   };
-  const SAMPLE_KITS = ws.kits.filter((k) => k.journeyId === j.id);
+  const kits = ws.kits.filter((k) => k.journeyId === j.id);
   return (
-    <DashCtx.Provider value={{ SAMPLE, SAMPLE_KITS }}>
-      {ws.hasSample && <SampleBanner />}
+    <DashCtx.Provider value={{ journey, kits }}>
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Journey</span>
         <select value={j.id} onChange={(e) => setJid(e.target.value)} className="rounded-lg border border-brand-border bg-white px-3 py-2 text-sm max-w-full">
@@ -166,12 +165,12 @@ const LEG_ICON = { flight: Plane, hotel: Hotel, meeting: Compass };
 /* ------------- KPI ------------- */
 
 function KPIRow() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { journey, kits } = useDash();
   const stats = [
-    { label: "Exposure windows mapped", val: SAMPLE.windows.length, icon: Compass, tint: "from-indigo-100 to-indigo-50", color: "text-indigo-600" },
-    { label: "Kits in plan", val: SAMPLE_KITS.length, icon: Utensils, tint: "from-emerald-100 to-emerald-50", color: "text-emerald-600" },
-    { label: "Handovers", val: SAMPLE.batches.length, icon: MapPin, tint: "from-sky-100 to-sky-50", color: "text-sky-600" },
-    { label: "Custody entries", val: SAMPLE_KITS.reduce((n, k) => n + k.ledger.length, 0), icon: ShieldCheck, tint: "from-amber-100 to-amber-50", color: "text-amber-600" },
+    { label: "Exposure windows mapped", val: journey.windows.length, icon: Compass, tint: "from-indigo-100 to-indigo-50", color: "text-indigo-600" },
+    { label: "Kits in plan", val: kits.length, icon: Utensils, tint: "from-emerald-100 to-emerald-50", color: "text-emerald-600" },
+    { label: "Handovers", val: journey.batches.length, icon: MapPin, tint: "from-sky-100 to-sky-50", color: "text-sky-600" },
+    { label: "Custody entries", val: kits.reduce((n, k) => n + k.ledger.length, 0), icon: ShieldCheck, tint: "from-amber-100 to-amber-50", color: "text-amber-600" },
   ];
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -191,18 +190,18 @@ function KPIRow() {
 /* ------------- Exposure windows ------------- */
 
 function RevenueCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { journey } = useDash();
   return (
     <div className="lg:col-span-2 rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display font-extrabold text-lg">Exposure windows</h3>
-          <p className="text-xs text-muted-foreground">{SAMPLE.label}</p>
+          <p className="text-xs text-muted-foreground">{journey.label}</p>
         </div>
         <Link to="/scheduling" className="text-xs font-bold text-brand-accent">Meal plan →</Link>
       </div>
       <ul className="divide-y divide-brand-border/70">
-        {SAMPLE.windows.map((w) => (
+        {journey.windows.map((w) => (
           <li key={w.key} className={`py-3 flex items-center gap-3 text-sm ${w.accepted ? "" : "opacity-60"}`}>
             <span className="rounded bg-brand-primary px-1.5 py-0.5 text-[10px] font-bold text-white">{w.ruleId}</span>
             <span className="flex-1">
@@ -219,17 +218,17 @@ function RevenueCard() {
 /* ------------- Allergen profile ------------- */
 
 function DestinationsCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { journey } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <h3 className="font-display font-extrabold text-lg mb-1">Allergen profile</h3>
       <p className="text-xs text-muted-foreground mb-4">Held under explicit consent</p>
       <dl className="space-y-3 text-sm">
-        <div><dt className="text-xs text-muted-foreground">Diagnosed allergens</dt><dd className="font-semibold">{allergenList(SAMPLE.allergens)}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Severity</dt><dd className="font-semibold">{SAMPLE.severity}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Exclusion set</dt><dd>{SAMPLE.setId ? <SetBadge setId={SAMPLE.setId} long /> : "Refused"}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Menu preference</dt><dd className="font-semibold">{SAMPLE.preference}</dd></div>
-        <div><dt className="text-xs text-muted-foreground">Traveller</dt><dd className="font-mono text-xs">{SAMPLE.travellerKey}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Diagnosed allergens</dt><dd className="font-semibold">{allergenList(journey.allergens)}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Severity</dt><dd className="font-semibold">{journey.severity}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Exclusion set</dt><dd>{journey.setId ? <SetBadge setId={journey.setId} long /> : "Refused"}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Menu preference</dt><dd className="font-semibold">{journey.preference}</dd></div>
+        <div><dt className="text-xs text-muted-foreground">Traveller</dt><dd className="font-mono text-xs">{journey.travellerKey}</dd></div>
       </dl>
     </div>
   );
@@ -238,8 +237,8 @@ function DestinationsCard() {
 /* ------------- Calendar ------------- */
 
 function CalendarCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
-  const occasionDays = SAMPLE.windows.filter((w) => w.accepted).map((w) => w.occasionStart.slice(0, 10));
+  const { journey } = useDash();
+  const occasionDays = journey.windows.filter((w) => w.accepted).map((w) => w.occasionStart.slice(0, 10));
   const first = occasionDays[0] ?? new Date().toISOString().slice(0, 10);
   const [month, setMonth] = useState(new Date(+first.slice(0, 4), +first.slice(5, 7) - 1, 1));
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
@@ -277,18 +276,18 @@ function CalendarCard() {
 /* ------------- Kit status ------------- */
 
 function TotalTripsCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { kits } = useDash();
   const rows: [string, number, string][] = [
-    ["Receipt confirmed", SAMPLE_KITS.filter((k) => k.status === "Receipt confirmed").length, "bg-emerald-500"],
-    ["Withdrawn", SAMPLE_KITS.filter((k) => k.status === "Withdrawn").length, "bg-rose-400"],
-    ["With an exception recorded", SAMPLE_KITS.filter((k) => k.exceptionIds.length).length, "bg-amber-400"],
+    ["Receipt confirmed", kits.filter((k) => k.status === "Receipt confirmed").length, "bg-emerald-500"],
+    ["Withdrawn", kits.filter((k) => k.status === "Withdrawn").length, "bg-rose-400"],
+    ["With an exception recorded", kits.filter((k) => k.exceptionIds.length).length, "bg-amber-400"],
   ];
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs text-muted-foreground font-semibold">Kits in this journey</p>
-          <p className="font-display text-3xl font-extrabold mt-1">{SAMPLE_KITS.length}</p>
+          <p className="font-display text-3xl font-extrabold mt-1">{kits.length}</p>
         </div>
         <div className="size-10 rounded-xl bg-emerald-100 text-emerald-700 grid place-items-center">
           <Utensils className="size-4" />
@@ -302,7 +301,7 @@ function TotalTripsCard() {
               <span>{v}</span>
             </div>
             <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <div className={`h-full ${c}`} style={{ width: `${SAMPLE_KITS.length ? (v / SAMPLE_KITS.length) * 100 : 0}%` }} />
+              <div className={`h-full ${c}`} style={{ width: `${kits.length ? (v / kits.length) * 100 : 0}%` }} />
             </div>
           </div>
         ))}
@@ -314,15 +313,15 @@ function TotalTripsCard() {
 /* ------------- Itinerary ------------- */
 
 function UpcomingTripsCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { journey } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-display font-extrabold text-lg">Itinerary</h3>
-        <Link to="/itinerary" search={{ journey: SAMPLE.id }} className="text-xs font-bold text-brand-accent">Open →</Link>
+        <Link to="/itinerary" search={{ journey: journey.id }} className="text-xs font-bold text-brand-accent">Open →</Link>
       </div>
       <div className="space-y-3">
-        {SAMPLE.legs.map((l) => {
+        {journey.legs.map((l) => {
           const Icon = LEG_ICON[l.kind];
           const when = l.kind === "flight" ? l.depart : l.kind === "hotel" ? l.checkIn : l.start;
           return (
@@ -343,25 +342,25 @@ function UpcomingTripsCard() {
 /* ------------- Kits ------------- */
 
 function MealPackagesCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
+  const { journey, kits } = useDash();
   return (
     <div className="rounded-3xl border border-brand-border bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-display font-extrabold text-lg">Your kits</h3>
-          <p className="text-xs text-muted-foreground">{SAMPLE.productInfo ? `${SAMPLE.productInfo.name} · ${SAMPLE.productInfo.price}` : "Coordinator quote"}</p>
+          <p className="text-xs text-muted-foreground">{journey.productInfo ? `${journey.productInfo.name} · ${journey.productInfo.price}` : "Coordinator quote"}</p>
         </div>
-        <Link to="/records" search={{ journey: SAMPLE.id }} className="text-xs font-bold text-brand-accent">All records →</Link>
+        <Link to="/records" search={{ journey: journey.id }} className="text-xs font-bold text-brand-accent">All records →</Link>
       </div>
       <div className="grid sm:grid-cols-3 gap-4">
-        {SAMPLE_KITS.slice(0, 3).map((k) => (
+        {kits.slice(0, 3).map((k) => (
           <Link to="/records/$kitId" params={{ kitId: k.kitId }} key={k.kitId} className="group rounded-2xl border border-brand-border overflow-hidden hover:shadow-elegant transition-all hover:-translate-y-0.5">
             <div className="aspect-[4/3] bg-gradient-to-br from-emerald-200 to-teal-100 grid place-items-center relative">
               <ImgIcon className="size-8 text-white/80" />
               <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-widest bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-brand-primary">{k.sealNo}</span>
             </div>
             <div className="p-3">
-              <p className="font-semibold text-sm">{DISHES[SAMPLE.preference][k.type]}</p>
+              <p className="font-semibold text-sm">{DISHES[journey.preference][k.type]}</p>
               <p className="text-xs text-muted-foreground mt-0.5">{WINDOW_TYPES[k.type].kit} · {k.kitId}</p>
               <div className="mt-1"><KitStatusPill status={k.status} /></div>
             </div>
@@ -375,8 +374,8 @@ function MealPackagesCard() {
 /* ------------- Record updates ------------- */
 
 function MessagesCard() {
-  const { SAMPLE, SAMPLE_KITS } = useDash();
-  const entries = SAMPLE_KITS.flatMap((k) => k.ledger)
+  const { kits } = useDash();
+  const entries = kits.flatMap((k) => k.ledger)
     .sort((a, b) => toMin(b.ts) - toMin(a.ts))
     .slice(0, 5);
   return (

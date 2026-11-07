@@ -1,41 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, Database, FileUp, Loader2, LogIn, Plus, ShieldCheck } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { AlertTriangle, FileUp, Loader2, LogIn, Plus } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { loadSampleData } from "@/lib/data/store";
-import { buildSampleData } from "@/lib/data/sample";
 import { useWorkspace } from "@/lib/data/workspace-provider";
-import { deriveWorkspace, type Workspace } from "@/lib/processing";
-import { nowLondon } from "@/lib/jaap/time";
+import type { Workspace } from "@/lib/processing";
 
 function Panel({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "error" }) {
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
       <div className={`rounded-2xl border p-8 text-center ${tone === "error" ? "border-red-200 bg-red-50" : "border-brand-border bg-card"}`}>{children}</div>
     </div>
-  );
-}
-
-export function LoadSampleButton({ uid, className = "" }: { uid: string; className?: string }) {
-  const [busy, setBusy] = useState(false);
-  return (
-    <button
-      disabled={busy}
-      onClick={async () => {
-        setBusy(true);
-        try {
-          await loadSampleData(uid);
-          toast.success("Pre-registered validation data (§5.4) added to your account");
-        } catch (e) {
-          toast.error(`Could not add sample data: ${(e as Error).message}`);
-        } finally {
-          setBusy(false);
-        }
-      }}
-      className={`rounded-full border border-brand-border px-5 py-2.5 text-sm font-bold flex items-center justify-center gap-2 hover:border-brand-accent disabled:opacity-60 ${className}`}
-    >
-      {busy ? <Loader2 className="size-4 animate-spin" /> : <Database className="size-4" />} Load sample data (§5.4)
-    </button>
   );
 }
 
@@ -75,7 +49,7 @@ export function ConfirmButton({ label, confirmLabel, onConfirm, className = "" }
   );
 }
 
-export function EmptyState({ uid, title, text }: { uid: string; title: string; text: string }) {
+export function EmptyState({ uid: _uid, title, text }: { uid: string; title: string; text: string }) {
   return (
     <div className="rounded-2xl border border-dashed border-brand-border bg-card p-8 text-center">
       <p className="font-display text-xl font-extrabold">{title}</p>
@@ -87,13 +61,10 @@ export function EmptyState({ uid, title, text }: { uid: string; title: string; t
         <Link to="/import" className="rounded-full border border-brand-border px-5 py-2.5 text-sm font-bold flex items-center gap-2 hover:border-brand-accent">
           <FileUp className="size-4" /> Import CSV
         </Link>
-        <LoadSampleButton uid={uid} />
       </div>
     </div>
   );
 }
-
-const PREVIEW_KEY = "safemeal.assessorPreview";
 
 // Renders a page's content only when the signed-in account's workspace is ready.
 export function WorkspaceGate({
@@ -108,32 +79,6 @@ export function WorkspaceGate({
   emptyText?: string;
 }) {
   const s = useWorkspace();
-  const [assessorMode, setAssessorMode] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem(PREVIEW_KEY) === "1";
-    } catch {
-      return false;
-    }
-  });
-
-  const demoWs = useMemo(() => {
-    try {
-      const today = nowLondon().slice(0, 10);
-      return deriveWorkspace(buildSampleData(today), nowLondon());
-    } catch (e) {
-      console.error("Could not build sample workspace:", e);
-      return null;
-    }
-  }, []);
-
-  const toggleAssessor = (on: boolean) => {
-    setAssessorMode(on);
-    try {
-      localStorage.setItem(PREVIEW_KEY, on ? "1" : "0");
-    } catch {
-      // storage unavailable
-    }
-  };
 
   if (s.status === "loading")
     return (
@@ -144,48 +89,16 @@ export function WorkspaceGate({
     );
 
   if (s.status === "signed-out") {
-    if (assessorMode && demoWs) {
-      return (
-        <div>
-          <div className="bg-sky-50 border-b border-sky-200 px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-sky-950">
-            <span className="font-semibold flex items-center gap-2">
-              <ShieldCheck className="size-4 text-sky-600" />
-              Assessor Preview Mode — Running on pre-registered validation dataset (§5.4).
-            </span>
-            <div className="flex items-center gap-3">
-              <Link to="/onboarding" className="font-bold text-brand-primary underline hover:text-brand-accent">
-                Sign in to create your own isolated data →
-              </Link>
-              <button
-                onClick={() => toggleAssessor(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Exit preview
-              </button>
-            </div>
-          </div>
-          {children(demoWs, "assessor-demo")}
-        </div>
-      );
-    }
-
     return (
       <Panel>
         <p className="font-display text-2xl font-extrabold">Welcome to SafeMeal MVP</p>
         <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto">
-          Create an isolated account to input your own real travel itineraries and allergen profiles, or explore the pre-registered demonstration dataset (§5.4) as an endorsement assessor.
+          Sign in or create an account to manage your travellers, itineraries, and meal kit custody records.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link to="/onboarding" className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-6 py-3 text-sm font-bold text-white hover:bg-brand-accent shadow-sm">
             <LogIn className="size-4" /> Sign In / Create Account
           </Link>
-          <button
-            type="button"
-            onClick={() => toggleAssessor(true)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-brand-accent/40 bg-brand-accent/5 px-6 py-3 text-sm font-bold text-brand-primary hover:bg-brand-accent hover:text-white transition-all shadow-sm"
-          >
-            <ShieldCheck className="size-4 text-brand-accent" /> ⚡ Explore as Assessor (Instant Preview)
-          </button>
         </div>
       </Panel>
     );

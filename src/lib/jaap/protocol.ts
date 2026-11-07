@@ -74,9 +74,11 @@ export const WINDOW_TYPES: Record<WindowType, { label: string; kit: string; rule
   in_transit: { label: "In transit", kit: "In-transit kit", rule: "R4" },
 };
 
+export type RuleCategory = "Exposure Rules" | "Allergen Rules" | "Production Rules" | "Handover Rules";
+
 export type RuleDef = {
   id: string;
-  group: "Exposure mapping" | "Exclusion and production" | "Handover";
+  group: RuleCategory;
   name: string;
   condition: string;
   output: string;
@@ -87,7 +89,7 @@ export type RuleDef = {
 export const RULES: RuleDef[] = [
   {
     id: "R1",
-    group: "Exposure mapping",
+    group: "Exposure Rules",
     name: "Late arrival",
     condition: "A flight lands after 21:00 and the traveller checks in to a hotel the same night.",
     output: "Late-arrival exposure window at the hotel, kit type: Arrival kit (1 kit-equivalent per covered person).",
@@ -96,7 +98,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "R2",
-    group: "Exposure mapping",
+    group: "Exposure Rules",
     name: "Hotel breakfast",
     condition: "Each full morning of a hotel stay: the traveller is in the hotel at 07:30 (stay continues, or check-out is 07:30 or later).",
     output: "Breakfast exposure window for that morning, kit type: Breakfast kit.",
@@ -105,7 +107,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "R3",
-    group: "Exposure mapping",
+    group: "Exposure Rules",
     name: "Working lunch",
     condition: "A meeting or event block spans 12:00 to 14:00 and has no catering line.",
     output: "Lunch exposure window at the meeting location, kit type: Lunch kit.",
@@ -114,7 +116,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "R4",
-    group: "Exposure mapping",
+    group: "Exposure Rules",
     name: "In-transit",
     condition: "A flight segment is longer than three hours (180 minutes).",
     output: "In-transit exposure window, kit type: In-transit kit.",
@@ -123,7 +125,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "R5",
-    group: "Exclusion and production",
+    group: "Allergen Rules",
     name: "Exclusion-set assignment",
     condition: "Every diagnosed allergen in the profile is excluded by a published exclusion set.",
     output: "The smallest exclusion set that covers the whole profile. If no set covers it, the order is refused with an honest answer.",
@@ -132,7 +134,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "P1",
-    group: "Exclusion and production",
+    group: "Production Rules",
     name: "Run grouping",
     condition: "Kits share an exclusion set and a production day.",
     output: "Kits are grouped into one single-allergen run of up to 55 kit-equivalents; a kit may only enter a run whose exclusion set covers its profile.",
@@ -141,7 +143,7 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "P2",
-    group: "Exclusion and production",
+    group: "Production Rules",
     name: "Run sequencing and timing",
     condition: "Runs are produced on Wednesday, Thursday and Friday; a handover starting before 18:00 on a run day is served by the previous run day, and every kit must be eaten within 5 days of its run.",
     output: "Most restrictive exclusion sets run first in the day, after the deepest clean. Each run needs an accepted clearance before it starts.",
@@ -150,12 +152,21 @@ export const RULES: RuleDef[] = [
   },
   {
     id: "H1",
-    group: "Handover",
-    name: "Hotel batch",
+    group: "Handover Rules",
+    name: "Hotel batch consolidation",
     condition: "Accepted windows at the same hotel stay (late arrival and breakfasts).",
     output: "One courier handover to the hotel front desk per stay (split if a kit would pass its use-by).",
     handover: "Front desk signs receipt into the record; each release to the traveller is a further entry.",
     planRef: "§4.4, §13.7",
+  },
+  {
+    id: "H2",
+    group: "Handover Rules",
+    name: "Direct venue & transit handovers",
+    condition: "Meeting lunch or in-transit flight exposure window.",
+    output: "Point-to-point courier delivery scheduled directly to the destination venue or airport landside before security.",
+    handover: "11:00–12:00 for meeting venue; 180–90 min before departure landside for airport.",
+    planRef: "§4.4",
   },
 ];
 
