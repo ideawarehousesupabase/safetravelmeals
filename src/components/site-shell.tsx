@@ -49,7 +49,6 @@ const sidebarSections = [
       { to: "/scheduling", label: "Meal Plan", icon: Calendar },
       { to: "/meals", label: "Meal Menu", icon: Utensils },
       { to: "/tracking", label: "Kit Tracking", icon: MapPin },
-      { to: "/import", label: "Import Data", icon: Upload },
     ],
   },
   {

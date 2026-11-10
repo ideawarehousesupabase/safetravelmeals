@@ -567,7 +567,7 @@ function Matrix({ ws }: { ws: Workspace }) {
         ) : (
           <div className="mt-4 p-4 rounded-xl border border-dashed border-brand-border bg-secondary/30 text-sm text-muted-foreground flex items-center justify-between gap-4">
             <p>
-              No traveller itinerary is currently loaded. You can view all predefined JAAP rules below. To run the dynamic evaluation against your trips, add an itinerary in the planner or import sample data.
+              No traveller itinerary is currently loaded. You can view all predefined JAAP rules below. To run the dynamic evaluation against your trips, add an itinerary in the planner.
             </p>
             <Link
               to="/itinerary"

@@ -58,9 +58,6 @@ export function EmptyState({ uid: _uid, title, text }: { uid: string; title: str
         <Link to="/itinerary" className="rounded-full bg-brand-primary px-5 py-2.5 text-sm font-bold text-white flex items-center gap-2 hover:bg-brand-accent">
           <Plus className="size-4" /> Add a journey
         </Link>
-        <Link to="/import" className="rounded-full border border-brand-border px-5 py-2.5 text-sm font-bold flex items-center gap-2 hover:border-brand-accent">
-          <FileUp className="size-4" /> Import CSV
-        </Link>
       </div>
     </div>
   );
@@ -71,7 +68,7 @@ export function WorkspaceGate({
   children,
   requireData = true,
   emptyTitle = "No journeys yet",
-  emptyText = "Add a traveller's allergen profile and itinerary, or import them from CSV. The rule engine works out the exposure windows, kits, runs and handovers from that.",
+  emptyText = "Add a traveller's allergen profile and itinerary in the planner. The rule engine works out the exposure windows, kits, runs and handovers from that.",
 }: {
   children: (ws: Workspace, uid: string) => ReactNode;
   requireData?: boolean;

@@ -12,7 +12,6 @@ const tabs = [
   { to: "/validation", label: "4. Test Results" },
   { to: "/exceptions", label: "5. Exception Handling" },
   { to: "/itinerary", label: "Itinerary Planner" },
-  { to: "/import", label: "Import Data" },
 ] as const;
 
 export function JaapNav() {
