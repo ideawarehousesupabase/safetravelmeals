@@ -413,7 +413,7 @@ function Stage() {
   const items = [
     { icon: FlaskConical, title: "Technology readiness level 4", text: "A working prototype of the ordering and itinerary interface. The validation programme with an independent food safety consultant runs in months 1 to 6." },
     { icon: Building2, title: "Hotel partnerships in development", text: "Two London hotels from two major UK hotel groups have signed expressions of interest in a food partnership. A controlled pilot comes before any expansion." },
-    { icon: MapPin, title: "Greater London first", text: "Production runs in hired segregated capacity at a rated London partner kitchen. The service is United Kingdom only." },
+    { icon: MapPin, title: "Greater London first", text: "Production runs in hired segregated capacity at a rated London partner kitchen, with Dublin identified as a future expansion market." },
   ];
   return (
     <section id="partners" className="py-16 border-t border-brand-border">

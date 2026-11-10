@@ -58,7 +58,7 @@ function AboutPage() {
         {[
           { icon: Heart, title: "Where it started", desc: "Our founder is a professional chef in London hotel kitchens with Level 3 food hygiene certification who works to HACCP every day. He saw, from behind the pass, that a shared breakfast line can reduce allergen risk but cannot verify its absence." },
           { icon: ShieldCheck, title: "What we sell", desc: "A stated production regime and a verifiable record of it: single-allergen runs, signed line clearance, numbered seals and a hash-chained handover record. Our CTO, a full-stack engineer, builds the platform that executes it." },
-          { icon: Globe, title: "Where we are", desc: "Technology readiness level 4 with a working prototype. UK patent application GB2617886.3 filed. Greater London first; the service is United Kingdom only." },
+          { icon: Globe, title: "Where we are", desc: "Technology readiness level 4 with a working prototype. UK patent application GB2617886.3 filed. Initial launch planned for Greater London, UK, with Dublin, Ireland identified as a future expansion market following successful validation of the London model." },
         ].map((c) => (
           <div key={c.title} className="rounded-3xl border border-brand-border bg-card p-7">
             <div className="size-12 rounded-2xl bg-brand-accent/10 text-brand-accent grid place-items-center mb-5">
@@ -102,7 +102,7 @@ function AboutPage() {
           <div className="rounded-3xl border border-brand-border bg-card p-8 space-y-4 text-sm">
             <Detail icon={Building2} label="Company" value="Safe Travel Meal Kits Limited" />
             <Detail icon={MapPin} label="Based in" value="London, United Kingdom" />
-            <Detail icon={Globe} label="Service area" value="Greater London during validation; United Kingdom only" />
+            <Detail icon={Globe} label="Service area" value="Greater London (launch); Dublin, Ireland (future expansion)" />
           </div>
         </div>
       </section>
