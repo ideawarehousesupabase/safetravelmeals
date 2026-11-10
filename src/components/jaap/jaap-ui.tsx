@@ -11,7 +11,6 @@ const tabs = [
   { to: "/records", label: "3. Kit Records" },
   { to: "/validation", label: "4. Test Results" },
   { to: "/exceptions", label: "5. Exception Handling" },
-  { to: "/itinerary", label: "Itinerary Planner" },
 ] as const;
 
 export function JaapNav() {

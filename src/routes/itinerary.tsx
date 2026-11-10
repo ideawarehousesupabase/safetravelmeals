@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { SiteShell, PageHeader } from "@/components/site-shell";
-import { Card, JaapNav, Pill, SetBadge } from "@/components/jaap/jaap-ui";
+import { Card, Pill, SetBadge } from "@/components/jaap/jaap-ui";
 import { ConfirmButton, WorkspaceGate } from "@/components/workspace-gate";
 import { Plane, Hotel, Briefcase, Plus, MapPin, Clock, ArrowRight, Trash2, ShieldX, ListChecks, Package, Save, Loader2 } from "lucide-react";
 import { legLabel, type Leg } from "@/lib/jaap/engine";
@@ -65,10 +65,9 @@ function ItineraryPage() {
         description="Enter the traveller's diagnosed allergens and the legs of the journey. The rule engine finds each exposure window and turns it into an allergen-controlled kit plan, saved to your account."
       >
         <Link to="/rules" className="rounded-full bg-brand-primary px-5 py-3 text-sm font-bold text-white flex items-center gap-2 hover:bg-brand-accent transition-colors">
-          <ListChecks className="size-4" /> Rule matrix
+          <ListChecks className="size-4" /> View Rule Matrix
         </Link>
       </PageHeader>
-      <JaapNav />
       <WorkspaceGate requireData={false}>{(ws, uid) => <Planner ws={ws} uid={uid} />}</WorkspaceGate>
     </SiteShell>
   );
